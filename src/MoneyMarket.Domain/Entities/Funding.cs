@@ -10,5 +10,7 @@
 
         public Loan Loan { get; set; } = null!;
         public Lender Lender { get; set; } = null!;
+
+        public string? IdempotencyKey { get; set; }
     }
 }

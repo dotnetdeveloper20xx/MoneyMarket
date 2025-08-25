@@ -17,25 +17,17 @@ namespace MoneyMarket.Api.Controllers
         private readonly IMediator _mediator;
         public LoansController(IMediator mediator) => _mediator = mediator;
 
+        // Handler should pull BorrowerId from ICurrentUserService, not from the request body.
         [Authorize(Roles = "Borrower")]
         [HttpPost]
         public async Task<ActionResult<ApiResponse<Guid>>> Submit([FromBody] SubmitLoanCommand cmd, CancellationToken ct)
             => Ok(await _mediator.Send(cmd, ct));
 
-
-        [Authorize(Roles = "Admin")] 
+        [Authorize(Policy = "CanApproveLoan")]
         [HttpPost("{loanId:guid}/approve")]
-        public async Task<ActionResult<ApiResponse<bool>>> Approve(
-            Guid loanId,
-            [FromBody] ApproveLoanRequest body,
-            CancellationToken ct)
+        public async Task<ActionResult<ApiResponse<bool>>> Approve(Guid loanId, [FromBody] ApproveLoanRequest body, CancellationToken ct)
         {
-            var cmd = new ApproveLoanCommand(
-                loanId,
-                body.ApprovedAmount,
-                body.InterestRate,
-                body.Fees);
-
+            var cmd = new ApproveLoanCommand(loanId, body.ApprovedAmount, body.InterestRate, body.Fees);
             var result = await _mediator.Send(cmd, ct);
             return Ok(result);
         }

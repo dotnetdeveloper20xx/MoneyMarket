@@ -6,5 +6,6 @@ using System.Threading.Tasks;
 
 namespace MoneyMarket.Application.Features.Auth.Dtos
 {
-    public sealed record MeDto(string UserId, string Email, string[] Roles);
+    public sealed record MeDto(string UserId, string Email, IReadOnlyList<string> Roles);
+
 }

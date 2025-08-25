@@ -3,18 +3,18 @@ using Hellang.Middleware.ProblemDetails;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using MoneyMarket.Api.Common.Services;
-using MoneyMarket.Application.Common.Abstractions;     // IAppDbContext, IJwtTokenService, IIdentityService
-using MoneyMarket.Application.Common.Behaviors;       // ValidationBehavior
-using MoneyMarket.Application.Common.Models;          // ApiResponse<>
-
-using MoneyMarket.Infrastructure.Identity;            // IdentityService
-using MoneyMarket.Persistence.Context;                // AppDbContext
-using MoneyMarket.Persistence.Identity;               // IdentityDbContextMM
+using MoneyMarket.Api.Common.Services;              // CurrentUserService
+// Existing namespaces
+using MoneyMarket.Application;                       // AddApplication()
+using MoneyMarket.Application.Common.Abstractions;  // ICurrentUserService
+using MoneyMarket.Application.Common.Behaviors;     // (for types if needed in compile)
+using MoneyMarket.Application.Common.Models;        // ApiResponse<>
+using MoneyMarket.Infrastructure;                   // AddInfrastructure()
+using MoneyMarket.Infrastructure.Identity;          // IdentityService
+using MoneyMarket.Persistence;                      // AddPersistence()
+using MoneyMarket.Persistence.Identity;
 using Serilog;
 using System.Security.Claims;
 using System.Text;
@@ -22,35 +22,12 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // ─────────────────────────────────────────────
-// Connection string
+// Logging (Serilog)
 // ─────────────────────────────────────────────
-var conn = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Host.UseSerilog((ctx, lc) => lc.ReadFrom.Configuration(ctx.Configuration));
 
 // ─────────────────────────────────────────────
-// DbContexts
-//   • Identity DB (for ASP.NET Identity)
-//   • App DB (for domain data) + map IAppDbContext
-// ─────────────────────────────────────────────
-builder.Services.AddDbContext<IdentityDbContextMM>(o => o.UseSqlServer(conn));
-
-builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlServer(conn));
-builder.Services.AddScoped<IAppDbContext>(sp => (IAppDbContext)sp.GetRequiredService<AppDbContext>());
-
-// ─────────────────────────────────────────────
-// ASP.NET Core Identity (single registration!)
-// ─────────────────────────────────────────────
-builder.Services
-    .AddIdentityCore<ApplicationUser>(opt =>
-    {
-        opt.Password.RequiredLength = 8;
-        opt.User.RequireUniqueEmail = true;
-    })
-    .AddRoles<ApplicationRole>()
-    .AddEntityFrameworkStores<IdentityDbContextMM>()
-    .AddSignInManager();
-
-// ─────────────────────────────────────────────
-// JWT Authentication
+// Authentication (JWT)
 // ─────────────────────────────────────────────
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -69,14 +46,11 @@ builder.Services
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.FromSeconds(30), // small dev leeway
-
-            // critical for slim controllers
+            ClockSkew = TimeSpan.FromSeconds(30),
             NameClaimType = ClaimTypes.Name,
             RoleClaimType = ClaimTypes.Role
         };
     });
-
 
 // ─────────────────────────────────────────────
 // Authorization policies
@@ -89,27 +63,18 @@ builder.Services.AddAuthorization(options =>
 });
 
 // ─────────────────────────────────────────────
-// Logging (Serilog)
+// Clean DI wiring by project
 // ─────────────────────────────────────────────
-builder.Host.UseSerilog((ctx, lc) => lc.ReadFrom.Configuration(ctx.Configuration));
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-// ─────────────────────────────────────────────
-// MediatR + FluentValidation (Application assembly)
-// ─────────────────────────────────────────────
-var appAssembly = typeof(ApiResponse<>).Assembly; // MoneyMarket.Application
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(appAssembly));
-builder.Services.AddValidatorsFromAssembly(appAssembly);
-builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-
-// Infrastructure services
+// Infrastructure services you already have (JwtTokenService/IdentityService)
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 
-// Access HttpContext in services
-builder.Services.AddHttpContextAccessor();
-
-// Current user abstraction
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddApplication();                       // MediatR, Validators, Behaviors
+builder.Services.AddInfrastructure(builder.Configuration); // DateTime/Guid/etc.
+builder.Services.AddPersistence(builder.Configuration);    // DbContexts, Repositories, UoW
 
 // ─────────────────────────────────────────────
 // ProblemDetails
@@ -170,16 +135,11 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 // ─────────────────────────────────────────────
-// Ensure databases are migrated & seed Admin user
+// Migrate & seed
 // ─────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
-    var idCtx = scope.ServiceProvider.GetRequiredService<IdentityDbContextMM>();
-    await idCtx.Database.MigrateAsync();
-
-    var appCtx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await appCtx.Database.MigrateAsync();
-
+    await PersistenceMigrationRunner.RunAsync(scope.ServiceProvider);
     await IdentitySeed.SeedAsync(scope.ServiceProvider);
 }
 

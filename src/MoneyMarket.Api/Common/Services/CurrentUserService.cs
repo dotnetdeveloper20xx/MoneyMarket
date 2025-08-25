@@ -1,36 +1,23 @@
-﻿using MoneyMarket.Api.Common.Extensions;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using MoneyMarket.Application.Common.Abstractions;
-using System.Security.Claims;
 
-namespace MoneyMarket.Api.Common.Services
+namespace MoneyMarket.Api.Common.Services;
+
+public sealed class CurrentUserService : ICurrentUserService
 {
-    /// <summary>
-    /// Web-layer implementation backed by IHttpContextAccessor.
-    /// Keeps controllers/handlers clean and testable.
-    /// </summary>
-    public sealed class CurrentUserService : ICurrentUserService
-    {
-        private readonly IHttpContextAccessor _accessor;
-        private ClaimsPrincipal? Principal => _accessor.HttpContext?.User;
+    private readonly IHttpContextAccessor _accessor;
+    public CurrentUserService(IHttpContextAccessor accessor) => _accessor = accessor;
 
-        public CurrentUserService(IHttpContextAccessor accessor) => _accessor = accessor;
+    private ClaimsPrincipal? User => _accessor.HttpContext?.User;
 
-        public bool IsAuthenticated => Principal?.Identity?.IsAuthenticated == true;
-        public string? UserId => Principal?.UserId();
-        public string? Email => Principal?.Email();
+    public bool IsAuthenticated => User?.Identity?.IsAuthenticated ?? false;
+    public string? UserId => User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? User?.FindFirstValue("sub");
+    public string? Email => User?.FindFirstValue(ClaimTypes.Email);
+    public IReadOnlyList<string> Roles => User?.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList() ?? new List<string>();
 
-        public IReadOnlyList<string> Roles =>
-            (IReadOnlyList<string>)(Principal is null ? Array.Empty<string>() : Principal.Roles());
+    public bool IsInRole(string role) => User?.IsInRole(role) ?? false;
 
-        public bool IsInRole(string role) =>
-            Roles.Contains(role, StringComparer.OrdinalIgnoreCase);
-
-        public string GetRequiredUserId()
-        {
-            var id = UserId;
-            if (string.IsNullOrWhiteSpace(id))
-                throw new UnauthorizedAccessException("No authenticated user.");
-            return id;
-        }
-    }
+    public string GetRequiredUserId()
+        => UserId ?? throw new UnauthorizedAccessException("User is not authenticated.");
 }
