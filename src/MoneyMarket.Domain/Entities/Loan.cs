@@ -1,5 +1,4 @@
 ﻿using MoneyMarket.Domain.Common;
-using MoneyMarket.Domain.Entities;
 using MoneyMarket.Domain.Enums;
 using MoneyMarket.Domain.Events;
 
@@ -7,9 +6,13 @@ namespace MoneyMarket.Domain.Entities;
 
 public class Loan : AuditableEntity
 {
+    // EF Core-friendly key with private setter
     public Guid LoanId { get; private set; } = Guid.NewGuid();
+
     public Guid BorrowerId { get; private set; }
     public Guid? LenderId { get; private set; }
+
+    public ICollection<Funding> Fundings { get; private set; } = new List<Funding>();
 
     // Request & terms
     public decimal RequestedAmount { get; private set; }
@@ -17,9 +20,9 @@ public class Loan : AuditableEntity
     public string Purpose { get; private set; } = string.Empty;
     public int TermMonths { get; private set; }
     public RepaymentFrequency RepaymentFrequency { get; private set; }
-    public decimal InterestRate { get; private set; } // % APR
-    public decimal Fees { get; private set; }
-    public decimal TotalRepayableAmount { get; private set; }
+    public decimal InterestRate { get; private set; }        // % APR (set when approved)
+    public decimal Fees { get; private set; }                 // set when approved
+    public decimal TotalRepayableAmount { get; private set; } // set when approved
 
     // Risk
     public int? CreditScoreAtApplication { get; private set; }
@@ -36,27 +39,34 @@ public class Loan : AuditableEntity
     public DateTime ApplicationDateUtc { get; private set; } = DateTime.UtcNow;
     public DateTime? FundedAtUtc { get; private set; }
 
+    // EF Core parameterless ctor
     private Loan() { }
 
-    public static Loan Submit(Guid borrowerId, decimal requestedAmount, string purpose, int termMonths, RepaymentFrequency frequency)
+ 
+    public Loan(
+        Guid borrowerId,
+        decimal requestedAmount,
+        string purpose,
+        int termMonths,
+        RepaymentFrequency frequency,
+        DateTime? applicationDateUtc = null)
     {
-        if (borrowerId == Guid.Empty) throw new ArgumentException("BorrowerId required.");
-        if (requestedAmount <= 0) throw new ArgumentOutOfRangeException(nameof(requestedAmount));
-        if (termMonths <= 0) throw new ArgumentOutOfRangeException(nameof(termMonths));
+        if (borrowerId == Guid.Empty) throw new ArgumentException("BorrowerId required.", nameof(borrowerId));
+        if (requestedAmount <= 0) throw new ArgumentOutOfRangeException(nameof(requestedAmount), "Must be > 0");
+        if (termMonths <= 0) throw new ArgumentOutOfRangeException(nameof(termMonths), "Must be > 0");
 
-        var loan = new Loan
-        {
-            BorrowerId = borrowerId,
-            RequestedAmount = decimal.Round(requestedAmount, 2),
-            Purpose = purpose?.Trim() ?? "",
-            TermMonths = termMonths,
-            RepaymentFrequency = frequency,
-            Status = LoanStatus.Submitted,
-            ApplicationDateUtc = DateTime.UtcNow
-        };
+        LoanId = Guid.NewGuid();
+        BorrowerId = borrowerId;
+        RequestedAmount = decimal.Round(requestedAmount, 2);
+        Purpose = purpose?.Trim() ?? string.Empty;
+        TermMonths = termMonths;
+        RepaymentFrequency = frequency;
 
-        loan.Raise(new LoanSubmittedEvent(loan.LoanId, borrowerId, loan.RequestedAmount));
-        return loan;
+        Status = LoanStatus.Submitted;                  // initial status on creation
+        ApplicationDateUtc = applicationDateUtc ?? DateTime.UtcNow;
+
+        // domain event on submission
+        Raise(new LoanSubmittedEvent(LoanId, borrowerId, RequestedAmount));
     }
 
     public void AttachUnderwriting(int? creditScore, decimal? dti, RiskGrade? risk, string? notes)
@@ -68,16 +78,15 @@ public class Loan : AuditableEntity
         Touch("underwriter");
     }
 
-    public void Approve(Guid lenderId, decimal approvedAmount, decimal interestRate, decimal fees)
+    public void Approve(decimal approvedAmount, decimal interestRate, decimal fees)
     {
         if (Status is not LoanStatus.Submitted and not LoanStatus.UnderReview)
-            throw new InvalidOperationException("Only submitted or under review loans can be approved.");
-        if (lenderId == Guid.Empty) throw new ArgumentException("LenderId required.");
+            throw new InvalidOperationException("Only submitted or under-review loans can be approved.");
+
         if (approvedAmount <= 0) throw new ArgumentOutOfRangeException(nameof(approvedAmount));
         if (interestRate < 0 || interestRate > 100) throw new ArgumentOutOfRangeException(nameof(interestRate));
         if (fees < 0) throw new ArgumentOutOfRangeException(nameof(fees));
 
-        LenderId = lenderId;
         ApprovedAmount = decimal.Round(approvedAmount, 2);
         InterestRate = interestRate;
         Fees = decimal.Round(fees, 2);
@@ -87,7 +96,7 @@ public class Loan : AuditableEntity
         Touch("admin-approve");
 
         GenerateRepaymentSchedule();
-        Raise(new LoanApprovedEvent(LoanId, lenderId, ApprovedAmount, InterestRate, TermMonths));
+        Raise(new LoanApprovedEvent(LoanId, ApprovedAmount, InterestRate, TermMonths));
     }
 
     public void Decline(string reason)
@@ -117,7 +126,6 @@ public class Loan : AuditableEntity
             throw new InvalidOperationException("Only funded loans can activate.");
         Status = LoanStatus.Active;
         Touch("system-activate");
-        // (Optional) Raise LoanActivatedEvent if you add one later
     }
 
     public void RecordPayment(Guid installmentId, decimal amount)
@@ -140,7 +148,10 @@ public class Loan : AuditableEntity
         }
     }
 
-    public void MarkInArrears() => Status = Status == LoanStatus.Active ? LoanStatus.InArrears : Status;
+    public void MarkInArrears()
+    {
+        if (Status == LoanStatus.Active) Status = LoanStatus.InArrears;
+    }
 
     public void DefaultLoan()
     {
@@ -162,7 +173,7 @@ public class Loan : AuditableEntity
 
     private decimal CalculateTotalRepayable(decimal principal, decimal annualRatePercent, int months, decimal fees)
     {
-        // Simple interest for demo; swap with amortization if needed.
+        // Simple interest for demo; replace with amortization if needed.
         var interest = principal * (annualRatePercent / 100m) * (months / 12m);
         return decimal.Round(principal + fees + interest, 2);
     }
@@ -171,13 +182,12 @@ public class Loan : AuditableEntity
     {
         _repaymentSchedule.Clear();
 
-        // Simple equal principal+interest split for demo
         var monthlyInterest = (InterestRate / 100m) / 12m;
         var principalPerInstallment = ApprovedAmount / TermMonths;
 
         for (int i = 1; i <= TermMonths; i++)
         {
-            var interestPortion = ApprovedAmount * monthlyInterest; // naive (not reducing balance)
+            var interestPortion = ApprovedAmount * monthlyInterest; // naive (non‑amortizing)
             var inst = new RepaymentInstallment(
                 LoanId,
                 i,

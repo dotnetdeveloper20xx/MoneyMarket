@@ -8,8 +8,71 @@
     <PackageReference Include="AutoMapper" Version="15.0.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="FluentValidation" Version="12.0.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
     <PackageReference Include="MediatR" Version="13.0.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Abstractions\" />
+    <Folder Include="Behaviors\" />
+    <Folder Include="Features\Admin\Commands\" />
+    <Folder Include="Features\Admin\Dtos\" />
+    <Folder Include="Features\Admin\Handlers\" />
+    <Folder Include="Features\Admin\Mappings\" />
+    <Folder Include="Features\Admin\Queries\" />
+    <Folder Include="Features\Admin\Validators\" />
+    <Folder Include="Features\Auth\Handlers\" />
+    <Folder Include="Features\Auth\Mappings\" />
+    <Folder Include="Features\Auth\Validators\" />
+    <Folder Include="Features\Borrowers\Commands\" />
+    <Folder Include="Features\Borrowers\Dtos\" />
+    <Folder Include="Features\Borrowers\Handlers\" />
+    <Folder Include="Features\Borrowers\Mappings\" />
+    <Folder Include="Features\Borrowers\Queries\" />
+    <Folder Include="Features\Borrowers\Validators\" />
+    <Folder Include="Features\CRM\Commands\" />
+    <Folder Include="Features\CRM\Dtos\" />
+    <Folder Include="Features\CRM\Handlers\" />
+    <Folder Include="Features\CRM\Mappings\" />
+    <Folder Include="Features\CRM\Queries\" />
+    <Folder Include="Features\CRM\Validators\" />
+    <Folder Include="Features\Lenders\Commands\" />
+    <Folder Include="Features\Lenders\Dtos\" />
+    <Folder Include="Features\Lenders\Handlers\" />
+    <Folder Include="Features\Lenders\Mappings\" />
+    <Folder Include="Features\Lenders\Queries\" />
+    <Folder Include="Features\Lenders\Validators\" />
+    <Folder Include="Features\Loans\Handlers\" />
+    <Folder Include="Features\Loans\Mappings\" />
+    <Folder Include="Features\Loans\Validators\" />
+    <Folder Include="Features\Messages\Commands\" />
+    <Folder Include="Features\Messages\Dtos\" />
+    <Folder Include="Features\Messages\Handlers\" />
+    <Folder Include="Features\Messages\Mappings\" />
+    <Folder Include="Features\Messages\Queries\" />
+    <Folder Include="Features\Messages\Validators\" />
+    <Folder Include="Features\Notifications\Commands\" />
+    <Folder Include="Features\Notifications\Dtos\" />
+    <Folder Include="Features\Notifications\Handlers\" />
+    <Folder Include="Features\Notifications\Mappings\" />
+    <Folder Include="Features\Notifications\Queries\" />
+    <Folder Include="Features\Notifications\Validators\" />
+    <Folder Include="Features\Repayments\Commands\" />
+    <Folder Include="Features\Repayments\Dtos\" />
+    <Folder Include="Features\Repayments\Handlers\" />
+    <Folder Include="Features\Repayments\Mappings\" />
+    <Folder Include="Features\Repayments\Queries\" />
+    <Folder Include="Features\Repayments\Validators\" />
+    <Folder Include="Features\Support\Commands\" />
+    <Folder Include="Features\Support\Dtos\" />
+    <Folder Include="Features\Support\Handlers\" />
+    <Folder Include="Features\Support\Mappings\" />
+    <Folder Include="Features\Support\Queries\" />
+    <Folder Include="Features\Support\Validators\" />
+    <Folder Include="Interfaces\" />
   </ItemGroup>
 
   <PropertyGroup>

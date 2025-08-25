@@ -10,6 +10,7 @@ public class AppDbContext : DbContext
     public DbSet<Borrower> Borrowers => Set<Borrower>();
     public DbSet<Lender> Lenders => Set<Lender>();
     public DbSet<Loan> Loans => Set<Loan>();
+    public DbSet<Funding> Fundings => Set<Funding>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

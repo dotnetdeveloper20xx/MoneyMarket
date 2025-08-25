@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MoneyMarket.Application\MoneyMarket.Application.csproj" />
     <ProjectReference Include="..\MoneyMarket.Domain\MoneyMarket.Domain.csproj" />
+    <ProjectReference Include="..\MoneyMarket.Persistence\MoneyMarket.Persistence.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -10,9 +11,11 @@
     <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.25.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.8" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.14.0" />
     <PackageReference Include="SendGrid" Version="9.29.3" />
     <PackageReference Include="Serilog" Version="4.3.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
   </ItemGroup>
 
   <PropertyGroup>
