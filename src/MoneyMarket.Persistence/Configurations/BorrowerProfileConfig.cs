@@ -48,6 +48,33 @@ namespace MoneyMarket.Persistence.Configurations
                 d.Property(p => p.Amount).HasColumnType("decimal(18,2)");
                 d.HasIndex("BorrowerProfileId");
             });
+
+            b.Property(x => x.PhotoPath).HasMaxLength(1024);
+
+            b.OwnsMany(x => x.Documents, d =>
+            {
+                d.ToTable("BorrowerDocuments");
+                d.WithOwner().HasForeignKey("BorrowerProfileId");
+                d.HasKey(x => x.Id);
+                d.Property(x => x.Type).HasConversion<int>();
+                d.Property(x => x.FileName).HasMaxLength(256).IsRequired();
+                d.Property(x => x.StoragePath).HasMaxLength(1024).IsRequired();
+                d.Property(x => x.UploadedAtUtc);
+                d.HasIndex("BorrowerProfileId");
+            });
+
+            b.OwnsMany(x => x.AuditTrail, a =>
+            {
+                a.ToTable("BorrowerAuditTrail");
+                a.WithOwner().HasForeignKey("BorrowerProfileId");
+                a.HasKey(x => x.Id);
+                a.Property(x => x.Action).HasMaxLength(64);
+                a.Property(x => x.Reason).HasMaxLength(2000);
+                a.Property(x => x.PerformedBy).HasMaxLength(256);
+                a.Property(x => x.OccurredAtUtc);
+                a.Property(x => x.OldStatus).HasConversion<int?>();
+                a.Property(x => x.NewStatus).HasConversion<int?>();
+            });
         }
     }
 }

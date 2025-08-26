@@ -19,6 +19,13 @@ public sealed class BorrowerProfile
     public DateTime CreatedAtUtc { get; private set; }
     public DateTime UpdatedAtUtc { get; private set; }
 
+    public string? PhotoPath { get; private set; }            // relative or URL
+    private readonly List<BorrowerDocument> _documents = new();
+    public IReadOnlyCollection<BorrowerDocument> Documents => _documents.AsReadOnly();
+    private readonly List<AuditTrailEntry> _audit = new();
+    public IReadOnlyCollection<AuditTrailEntry> AuditTrail => _audit.AsReadOnly();
+
+
     private BorrowerProfile() { }
     public static BorrowerProfile CreateDraft(
         string userId, string firstName, string lastName, DateTime dob, string nationalId,
@@ -67,5 +74,39 @@ public sealed class BorrowerProfile
         var age = asOf.Year - dob.Year;
         if (dob.Date > asOf.Date.AddYears(-age)) age--;
         return age;
+    }
+
+    public void SetPhoto(string path, DateTime now) { PhotoPath = path; UpdatedAtUtc = now; }
+    public void AddOrReplaceDocument(BorrowerDocument doc, DateTime now)
+    {
+        // one doc per type (replace) – adjust if you want multiple payslips
+        var existing = _documents.FirstOrDefault(d => d.Type == doc.Type);
+        if (existing is not null) _documents.Remove(existing);
+        _documents.Add(doc);
+        UpdatedAtUtc = now;
+    }
+
+    public void Submit(DateTime now, string performedBy)
+    {
+        var old = Status;
+        Status = ProfileStatus.Submitted;
+        UpdatedAtUtc = now;
+        _audit.Add(new AuditTrailEntry("Submitted", old, Status, null, performedBy, now));
+    }
+
+    public void Approve(DateTime now, string performedBy, string? reason = null)
+    {
+        var old = Status;
+        Status = ProfileStatus.Approved;
+        UpdatedAtUtc = now;
+        _audit.Add(new AuditTrailEntry("Approved", old, Status, reason, performedBy, now));
+    }
+
+    public void Reject(DateTime now, string performedBy, string? reason)
+    {
+        var old = Status;
+        Status = ProfileStatus.Rejected;
+        UpdatedAtUtc = now;
+        _audit.Add(new AuditTrailEntry("Rejected", old, Status, reason, performedBy, now));
     }
 }

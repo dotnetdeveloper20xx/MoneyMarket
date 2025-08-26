@@ -13,28 +13,12 @@ namespace MoneyMarket.Persistence.Repositories
         public async Task<BorrowerProfile?> GetByUserIdAsync(string userId, bool asNoTracking, CancellationToken ct)
         {
             IQueryable<BorrowerProfile> query = _db.Set<BorrowerProfile>();
-
-            // add includes first (or as needed)
-            query = query.Include(p => p.Debts);
-
-            // apply tracking mode last, but still on IQueryable<T>
-            if (asNoTracking)
-                query = query.AsNoTracking();
-
+            query = query.Include(p => p.Debts)
+                         .Include(p => p.Documents)
+                         .Include(p => p.AuditTrail);
+            if (asNoTracking) query = query.AsNoTracking();
             return await query.SingleOrDefaultAsync(p => p.UserId == userId, ct);
-        }
-
-        //public async Task<BorrowerProfile?> GetByUserIdAsync(
-        //                        string userId,
-        //                        bool asNoTracking,
-        //                        CancellationToken ct,
-        //                        bool includeDebts = true)
-        //{
-        //    IQueryable<BorrowerProfile> query = _db.Set<BorrowerProfile>();
-        //    if (includeDebts) query = query.Include(p => p.Debts);
-        //    if (asNoTracking) query = query.AsNoTracking();
-        //    return await query.SingleOrDefaultAsync(p => p.UserId == userId, ct);
-        //}
+        }    
 
         public async Task AddAsync(BorrowerProfile profile, CancellationToken ct)
             => await _db.AddAsync(profile, ct);
@@ -44,5 +28,13 @@ namespace MoneyMarket.Persistence.Repositories
 
         public async Task<bool> ExistsForUserAsync(string userId, CancellationToken ct)
             => await _db.Set<BorrowerProfile>().AnyAsync(p => p.UserId == userId, ct);
+
+        public async Task<BorrowerProfile?> GetByIdAsync(Guid id, bool asNoTracking, CancellationToken ct)
+        {
+            IQueryable<BorrowerProfile> q = _db.Set<BorrowerProfile>()
+                .Include(p => p.Debts).Include(p => p.Documents).Include(p => p.AuditTrail);
+            if (asNoTracking) q = q.AsNoTracking();
+            return await q.SingleOrDefaultAsync(p => p.Id == id, ct);
+        }
     }
 }

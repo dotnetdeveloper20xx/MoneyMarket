@@ -10,5 +10,7 @@ namespace MoneyMarket.Application.Common.Abstractions
 
         // Convenience helpers (optional but handy)
         Task<bool> ExistsForUserAsync(string userId, CancellationToken ct);
+
+        Task<BorrowerProfile?> GetByIdAsync(Guid id, bool asNoTracking, CancellationToken ct);
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using MoneyMarket.Application.Features.Borrowers.Commands;
 using MoneyMarket.Application.Features.Borrowers.Dtos;
 using MoneyMarket.Application.Features.Borrowers.Queries;
+using MoneyMarket.Domain.Borrowers;
 
 
 namespace MoneyMarket.API.Controllers;
@@ -41,4 +42,22 @@ public sealed class BorrowersController : ControllerBase
     [HttpGet("me")]
     public async Task<IActionResult> GetMyProfile(CancellationToken ct)
         => Ok(await _mediator.Send(new GetMyProfileQuery(), ct));
+
+    [HttpPost("photo")]
+    [RequestSizeLimit(20_000_000)] // 20 MB
+    public async Task<IActionResult> UploadPhoto([FromForm] IFormFile file, CancellationToken ct)
+    {
+        await using var stream = file.OpenReadStream();
+        var cmd = new UploadProfilePhotoCommand(new UploadProfilePhotoDto(stream, file.FileName, file.ContentType));
+        return Ok(await _mediator.Send(cmd, ct));
+    }
+
+    [HttpPost("documents")]
+    [RequestSizeLimit(20_000_000)]
+    public async Task<IActionResult> UploadDocument([FromForm] IFormFile file, [FromForm] DocumentType type, CancellationToken ct)
+    {
+        await using var stream = file.OpenReadStream();
+        var cmd = new UploadBorrowerDocumentCommand(new UploadDocumentDto(type, stream, file.FileName, file.ContentType));
+        return Ok(await _mediator.Send(cmd, ct));
+    }
 }

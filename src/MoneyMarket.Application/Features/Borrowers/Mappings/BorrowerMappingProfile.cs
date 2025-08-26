@@ -33,6 +33,30 @@ namespace MoneyMarket.Application.Features.Borrowers.Mappings
                 .ForCtorParam("Status", opt => opt.MapFrom(src => src.Status.ToString()))
                 .ForCtorParam("DateCreated", opt => opt.MapFrom(src => src.CreatedAtUtc))
                 .ForCtorParam("LastUpdated", opt => opt.MapFrom(src => src.UpdatedAtUtc));
+
+            CreateMap<BorrowerDocument, /* optional view dto if you need */ object>();
+            // PhotoPath is already on profile; no special mapping needed unless you add to view DTO
+
+            CreateMap<BorrowerDocument, BorrowerDocumentViewDto>()
+                .ForCtorParam("FileName", o => o.MapFrom(s => s.FileName))
+                .ForCtorParam("Url", o => o.MapFrom(s => s.StoragePath))
+                .ForCtorParam("Type", o => o.MapFrom(s => s.Type.ToString()))
+                .ForCtorParam("UploadedAt", o => o.MapFrom(s => s.UploadedAtUtc));
+
+            CreateMap<AuditTrailEntry, AuditEntryViewDto>()
+                .ForCtorParam("Action", o => o.MapFrom(s => s.Action))
+                .ForCtorParam("OldStatus", o => o.MapFrom(s => s.OldStatus.HasValue ? s.OldStatus.Value.ToString() : null))
+                .ForCtorParam("NewStatus", o => o.MapFrom(s => s.NewStatus.HasValue ? s.NewStatus.Value.ToString() : null))
+                .ForCtorParam("Reason", o => o.MapFrom(s => s.Reason))
+                .ForCtorParam("PerformedBy", o => o.MapFrom(s => s.PerformedBy))
+                .ForCtorParam("At", o => o.MapFrom(s => s.OccurredAtUtc));
+
+            CreateMap<BorrowerProfile, BorrowerProfileViewDto>()
+                // previous mappings...
+                .ForCtorParam("PhotoPath", o => o.MapFrom(s => s.PhotoPath))
+                .ForCtorParam("Documents", o => o.MapFrom(s => s.Documents))
+                .ForCtorParam("Audit", o => o.MapFrom(s => s.AuditTrail));
+
         }
     }
 }

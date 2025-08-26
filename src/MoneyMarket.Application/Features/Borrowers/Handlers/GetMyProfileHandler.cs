@@ -4,12 +4,6 @@ using MoneyMarket.Application.Common.Abstractions;
 using MoneyMarket.Application.Common.Models;
 using MoneyMarket.Application.Features.Borrowers.Dtos;
 using MoneyMarket.Application.Features.Borrowers.Queries;
-using MoneyMarket.Domain.Borrowers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MoneyMarket.Application.Features.Borrowers.Handlers
 {
