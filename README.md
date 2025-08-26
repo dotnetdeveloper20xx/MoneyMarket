@@ -1,7 +1,36 @@
 
 # MoneyMarket Platform
 
-MoneyMarket is an online platform that connects **Borrowers** who need funds with **Lenders** who want to invest and earn profits.  
+The platform is an intuitive, user-friendly application that connects individuals seeking loans with lenders ready to invest. It's a two-sided marketplace designed to make the borrowing and lending process simple, transparent, and mutually beneficial. Whether you need a loan or want to earn a return on your money, this app has a solution for you. 
+
+---
+
+## For Borrowers: Get the Money You Need
+
+### Simple Access to Funds
+As a borrower, you can easily register and apply for a loan that fits your needs. You'll see a variety of loan products from different lenders, each with its own terms, interest rates, and repayment options. This gives you the power to compare and choose the best offer for your situation, whether it's for a short, mid, or long-term need. The application guides you through the process, from providing your personal and financial details to submitting your application.
+
+### Manage Your Loan with Ease
+Once your loan is approved and funded, you can manage everything directly from your personal dashboard. Your dashboard gives you a clear overview of all your loans, their status, and a breakdown of your repayments. You'll always know how much you've borrowed, how much you've paid back, and what's left to pay. When it's time to make a payment, the app makes it simple, showing you exactly what's due and allowing you to make payments effortlessly.
+
+### Stay Informed and Connected
+The app keeps you in the loop with real-time notifications about key events. You'll receive alerts when your loan is approved, when a lender funds your loan, or when a payment is overdue. If you have questions, you can use the built-in messaging feature to communicate directly with your lender or the support team. Your profile page allows you to easily update your contact information and details.
+
+---
+
+## For Lenders: Invest and Earn
+
+### Find Opportunities to Lend
+As a lender, you can register and create your own loan products, setting your own terms, amounts, and interest rates to attract borrowers. The platform allows you to compete with other lenders to fund loans, giving you an active role in growing your portfolio. You'll have access to a pool of borrowers seeking funds, presenting you with a continuous flow of potential investments.
+
+### Track Your Investments
+Your dashboard is your command center, offering a complete summary of your lending activity. You can see your total investment, your total profit, and a list of all the loans you've funded. The app makes it easy to track payments, showing you which borrowers have paid and which payments are overdue. This transparency allows you to stay on top of your investments and make informed decisions.
+
+### Secure and Profitable
+The platform is designed to help you generate a profit. For every loan you fund, you'll earn a percentage of the interest paid by the borrower. The app handles all the administrative work, from disbursing funds to managing repayments, so you can focus on growing your portfolio. Just like borrowers, you'll receive notifications about important events, such as when a borrower makes a repayment or when a new borrower signs up. You can also communicate with borrowers or the support team through the messaging feature.
+
+
+
 The application has been designed with **Clean Architecture, CQRS, Domain-Driven Design (DDD)** principles, ensuring a scalable, maintainable, and secure financial platform.  
 
 This document explains how the application works, the roles involved, what data is collected, how loans function as first-class entities, and how we ensure compliance, security, and auditability.  
