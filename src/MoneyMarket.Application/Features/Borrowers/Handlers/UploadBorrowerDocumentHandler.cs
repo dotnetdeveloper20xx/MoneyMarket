@@ -20,17 +20,18 @@ namespace MoneyMarket.Application.Features.Borrowers.Handlers
         public async Task<ApiResponse<string>> Handle(UploadBorrowerDocumentCommand request, CancellationToken ct)
         {
             var uid = _user.UserId!;
-            var profile = await _repo.GetByUserIdAsync(uid, false, ct) ?? throw new InvalidOperationException("Profile not found.");
+            var profile = await _repo.GetByUserIdAsync(uid, asNoTracking: false, ct)
+                ?? throw new InvalidOperationException("Profile not found.");
 
             var ext = Path.GetExtension(request.File.FileName);
             var path = $"borrowers/{uid}/{request.File.Type.ToString().ToLowerInvariant()}{ext}";
-            var stored = await _storage.UploadAsync("docs", path, request.File.Content, request.File.ContentType, ct);
+            var url = await _storage.UploadAsync("docs", path, request.File.Content, request.File.ContentType, ct);
 
-            var doc = new BorrowerDocument(request.File.Type, request.File.FileName, stored, _clock.UtcNow);
+            var doc = new BorrowerDocument(request.File.Type, request.File.FileName, url, _clock.UtcNow);
             profile.AddOrReplaceDocument(doc, _clock.UtcNow);
-            _repo.Update(profile);
+        
 
-            return ApiResponse<string>.SuccessResult(stored, "Document uploaded.");
+            return ApiResponse<string>.SuccessResult(url, "Document uploaded.");
         }
     }
 }

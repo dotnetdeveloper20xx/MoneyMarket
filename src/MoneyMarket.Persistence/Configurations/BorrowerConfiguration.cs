@@ -17,8 +17,8 @@ public class BorrowerConfiguration : IEntityTypeConfiguration<Borrower>
         builder.Property(b => b.PhoneNumber).HasMaxLength(150);
         builder.Property(b => b.Email).HasMaxLength(256);
 
-        // 🔗 Relationship to Identity User
-        builder.HasOne<ApplicationUser>()  // from Persistence.Identity
+        
+        builder.HasOne<ApplicationUser>() 
             .WithMany()
             .HasForeignKey(b => b.UserId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -37,7 +37,7 @@ public class BorrowerConfiguration : IEntityTypeConfiguration<Borrower>
         builder.OwnsMany(b => b.ExistingDebts, d =>
         {
             d.WithOwner().HasForeignKey("BorrowerId");
-            d.HasKey("BorrowerId", "LenderName", "DebtType"); // composite key
+            d.HasKey("BorrowerId", "LenderName", "DebtType"); 
             d.Property(p => p.LenderName).HasMaxLength(150);
             d.Property(p => p.DebtType).HasMaxLength(100);
             d.Property(p => p.Amount).HasColumnType("decimal(18,2)");

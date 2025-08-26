@@ -16,8 +16,11 @@
      DateTime LastUpdated,
      string? PhotoPath,
      IReadOnlyCollection<BorrowerDocumentViewDto> Documents,
-     IReadOnlyCollection<AuditEntryViewDto> Audit);
+     IReadOnlyCollection<AuditEntryViewDto> Audit
+ );
 
     public sealed record BorrowerDocumentViewDto(string FileName, string Url, string Type, DateTime UploadedAt);
     public sealed record AuditEntryViewDto(string Action, string? OldStatus, string? NewStatus, string? Reason, string PerformedBy, DateTime At);
+
+
 }

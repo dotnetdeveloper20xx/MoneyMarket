@@ -43,8 +43,9 @@ public sealed class BorrowersController : ControllerBase
     public async Task<IActionResult> GetMyProfile(CancellationToken ct)
         => Ok(await _mediator.Send(new GetMyProfileQuery(), ct));
 
-    [HttpPost("photo")]
-    [RequestSizeLimit(20_000_000)] // 20 MB
+    [HttpPost("photo")] 
+    [RequestSizeLimit(20_000_000)] // 20 MB request body
+    [RequestFormLimits(MultipartBodyLengthLimit = 20_000_000)]
     public async Task<IActionResult> UploadPhoto([FromForm] IFormFile file, CancellationToken ct)
     {
         await using var stream = file.OpenReadStream();
@@ -54,6 +55,7 @@ public sealed class BorrowersController : ControllerBase
 
     [HttpPost("documents")]
     [RequestSizeLimit(20_000_000)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 20_000_000)]
     public async Task<IActionResult> UploadDocument([FromForm] IFormFile file, [FromForm] DocumentType type, CancellationToken ct)
     {
         await using var stream = file.OpenReadStream();

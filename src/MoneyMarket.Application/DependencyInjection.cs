@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using MoneyMarket.Application.Common.Behaviors;
+using AutoMapper;
 
 namespace MoneyMarket.Application;
 
@@ -26,8 +27,13 @@ public static class DependencyInjection
         // FluentValidation – scan validators in Application
         services.AddValidatorsFromAssembly(appAssembly);
 
-        // AutoMapper – scan profiles in Application
-        services.AddAutoMapper(appAssembly);
+        services.AddSingleton<IMapper>(sp =>
+        {
+            var cfg = new MapperConfiguration(mc => mc.AddMaps(typeof(DependencyInjection).Assembly));
+            cfg.AssertConfigurationIsValid();
+            // For AutoMapper versions that expect Func<Type, object>
+            return cfg.CreateMapper(type => sp.GetRequiredService(type));
+        });
 
         return services;
     }

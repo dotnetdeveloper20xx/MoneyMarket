@@ -18,13 +18,19 @@ namespace MoneyMarket.Persistence.Repositories
                          .Include(p => p.AuditTrail);
             if (asNoTracking) query = query.AsNoTracking();
             return await query.SingleOrDefaultAsync(p => p.UserId == userId, ct);
-        }    
+        }
 
         public async Task AddAsync(BorrowerProfile profile, CancellationToken ct)
             => await _db.AddAsync(profile, ct);
 
         public void Update(BorrowerProfile profile)
-            => _db.Update(profile);
+        {
+            var entry = _db.Entry(profile);
+            if (entry.State == EntityState.Detached)
+            {
+                _db.Attach(profile);
+            }
+        }
 
         public async Task<bool> ExistsForUserAsync(string userId, CancellationToken ct)
             => await _db.Set<BorrowerProfile>().AnyAsync(p => p.UserId == userId, ct);

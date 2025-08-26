@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MoneyMarket.Persistence.Context;
 
@@ -11,9 +12,11 @@ using MoneyMarket.Persistence.Context;
 namespace MoneyMarket.Persistence.Migrations.App
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250826115015_BorrowerFilesAndAudit")]
+    partial class BorrowerFilesAndAudit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -453,6 +456,7 @@ namespace MoneyMarket.Persistence.Migrations.App
                     b.OwnsMany("MoneyMarket.Domain.Borrowers.AuditTrailEntry", "AuditTrail", b1 =>
                         {
                             b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("Action")
@@ -494,6 +498,7 @@ namespace MoneyMarket.Persistence.Migrations.App
                     b.OwnsMany("MoneyMarket.Domain.Borrowers.BorrowerDocument", "Documents", b1 =>
                         {
                             b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<Guid>("BorrowerProfileId")
@@ -563,6 +568,7 @@ namespace MoneyMarket.Persistence.Migrations.App
                     b.OwnsMany("MoneyMarket.Domain.Borrowers.ExistingDebt", "Debts", b1 =>
                         {
                             b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<decimal>("Amount")
