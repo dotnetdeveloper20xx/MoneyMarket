@@ -29,12 +29,6 @@
     <Folder Include="Features\Auth\Validators\" />
     <Folder Include="Features\CRM\Mappings\" />
     <Folder Include="Features\CRM\Validators\" />
-    <Folder Include="Features\Lenders\Commands\" />
-    <Folder Include="Features\Lenders\Dtos\" />
-    <Folder Include="Features\Lenders\Handlers\" />
-    <Folder Include="Features\Lenders\Mappings\" />
-    <Folder Include="Features\Lenders\Queries\" />
-    <Folder Include="Features\Lenders\Validators\" />
     <Folder Include="Features\Loans\Handlers\" />
     <Folder Include="Features\Loans\Mappings\" />
     <Folder Include="Features\Loans\Validators\" />

@@ -17,6 +17,9 @@ namespace MoneyMarket.Application.Common.Abstractions
         Task<(IReadOnlyList<Lender> Items, int Total)> GetPagedAsync(int page, int size, CancellationToken ct);
         Task<Lender?> GetByIdAsync(Guid id, CancellationToken ct);
 
+        // NEW: fetch aggregate by user id (to get LenderId)
+        Task<Lender?> GetAggregateByUserIdAsync(string userId, bool asNoTracking, CancellationToken ct);
+
         Task SaveChangesAsync(CancellationToken ct);
     }
 }

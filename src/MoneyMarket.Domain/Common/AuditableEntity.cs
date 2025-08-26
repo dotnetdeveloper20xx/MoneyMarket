@@ -12,4 +12,5 @@ public abstract class AuditableEntity : BaseEntity
         LastModifiedBy = actor;
         LastModifiedAtUtc = DateTime.UtcNow;
     }
+     
 }

@@ -43,6 +43,10 @@ public static class DependencyInjection
         services.AddScoped<IBorrowerRepository, BorrowerRepository>();
         services.AddScoped<ILenderRepository, LenderRepository>();
 
+        services.AddScoped<ILenderApplicationRepository, LenderApplicationRepository>();
+        services.AddScoped<ILenderProductRepository, LenderProductRepository>();
+
+
         return services;
     }
 }

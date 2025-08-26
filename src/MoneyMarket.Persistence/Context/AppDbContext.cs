@@ -15,7 +15,8 @@ public class AppDbContext : DbContext, IAppDbContext, IUnitOfWork
     public DbSet<Loan> Loans => Set<Loan>();
     public DbSet<Funding> Fundings => Set<Funding>();
     public DbSet<RepaymentInstallment> RepaymentInstallments => Set<RepaymentInstallment>();
-     
+    public DbSet<LenderApplication> LenderApplications => Set<LenderApplication>();
+    public DbSet<LenderProduct> LenderProducts => Set<LenderProduct>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

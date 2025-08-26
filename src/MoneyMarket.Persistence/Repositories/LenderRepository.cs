@@ -58,5 +58,18 @@ namespace MoneyMarket.Persistence.Repositories
 
         public Task SaveChangesAsync(CancellationToken ct)
             => _db.SaveChangesAsync(ct);
+
+        public async Task<Lender?> GetAggregateByUserIdAsync(string userId, bool asNoTracking, CancellationToken ct)
+        {
+            var q = _db.Lenders.AsQueryable();
+            if (asNoTracking) q = q.AsNoTracking();
+
+            // Assuming Lender.UserId is a string in your identity system.
+            // If it’s Guid, adapt the parameter/parse accordingly.
+
+            if (!Guid.TryParse(userId, out var userGuid))
+                throw new InvalidOperationException("Invalid user id claim");
+            return await q.FirstOrDefaultAsync(x => x.UserId.ToString() == userId || x.UserId == userGuid, ct);
+        }
     }
 }
