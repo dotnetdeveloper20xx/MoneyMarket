@@ -1,7 +1,8 @@
 ﻿using MediatR;
 using MoneyMarket.Application.Common.Abstractions;
+using MoneyMarket.Application.Features.CRM.Commands;
 
-namespace MoneyMarket.Application.Features.CRM.Commands
+namespace MoneyMarket.Application.Features.CRM.Handlers
 {
     public sealed class DisableBorrowerCommandHandler : IRequestHandler<DisableBorrowerCommand, bool>
     {

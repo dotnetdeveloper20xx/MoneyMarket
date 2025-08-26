@@ -26,7 +26,8 @@ public static class DependencyInjection
 
         // Repositories
         services.AddScoped<ILoanRepository, LoanRepository>();
-        services.AddScoped<IFundingRepository, FundingRepository>();
+        services.AddScoped<IFundingRepository, FundingRepository>();     
+        
 
         // ASP.NET Identity (this registers UserManager / SignInManager / RoleManager)
         services
@@ -40,6 +41,7 @@ public static class DependencyInjection
             .AddSignInManager();
 
         services.AddScoped<IBorrowerRepository, BorrowerRepository>();
+        services.AddScoped<ILenderRepository, LenderRepository>();
 
         return services;
     }

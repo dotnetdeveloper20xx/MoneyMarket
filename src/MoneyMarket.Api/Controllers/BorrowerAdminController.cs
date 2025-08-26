@@ -8,7 +8,7 @@ namespace MoneyMarket.Api.Controllers
 {
     [ApiController]
     [Route("api/admin/borrowers")]
-    [Authorize(Roles = "Admin,CreditRiskManager")]
+    [Authorize(Roles = "Admin,CRM")]
     public sealed class BorrowerAdminController : ControllerBase
     {
         private readonly IMediator _mediator;

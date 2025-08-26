@@ -27,7 +27,6 @@
     <Folder Include="Features\Auth\Handlers\" />
     <Folder Include="Features\Auth\Mappings\" />
     <Folder Include="Features\Auth\Validators\" />
-    <Folder Include="Features\CRM\Handlers\" />
     <Folder Include="Features\CRM\Mappings\" />
     <Folder Include="Features\CRM\Validators\" />
     <Folder Include="Features\Lenders\Commands\" />

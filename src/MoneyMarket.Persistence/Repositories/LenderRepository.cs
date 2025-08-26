@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MoneyMarket.Application.Common.Abstractions;
 using MoneyMarket.Domain.Entities;
+using MoneyMarket.Domain.Lenders;
 using MoneyMarket.Persistence.Context;
 
 namespace MoneyMarket.Persistence.Repositories
@@ -9,6 +10,35 @@ namespace MoneyMarket.Persistence.Repositories
     {
         private readonly AppDbContext _db;
         public LenderRepository(AppDbContext db) => _db = db;
+
+        public async Task<LenderProfile?> GetByUserIdAsync(string userId, bool asNoTracking, CancellationToken ct)
+        {
+            var query = _db.Set<LenderProfile>().AsQueryable();
+            if (asNoTracking) query = query.AsNoTracking();
+            return await query.FirstOrDefaultAsync(x => x.UserId == userId, ct);
+        }
+
+        public async Task AddAsync(LenderProfile lender, CancellationToken ct)
+        {
+            await _db.Set<LenderProfile>().AddAsync(lender, ct);
+        }
+
+        public void Update(LenderProfile lender)
+        {
+            _db.Set<LenderProfile>().Update(lender);
+        }
+
+        public async Task<bool> ExistsForUserAsync(string userId, CancellationToken ct)
+        {
+            return await _db.Set<LenderProfile>().AnyAsync(x => x.UserId == userId, ct);
+        }
+
+        public async Task<LenderProfile?> GetByIdAsync(Guid id, bool asNoTracking, CancellationToken ct)
+        {
+            var query = _db.Set<LenderProfile>().AsQueryable();
+            if (asNoTracking) query = query.AsNoTracking();
+            return await query.FirstOrDefaultAsync(x => x.Id == id, ct);
+        }
 
         public async Task<(IReadOnlyList<Lender> Items, int Total)> GetPagedAsync(int page, int size, CancellationToken ct)
         {
@@ -19,12 +49,14 @@ namespace MoneyMarket.Persistence.Repositories
                 .Skip((page - 1) * size)
                 .Take(size)
                 .ToListAsync(ct);
+
             return (items, total);
         }
 
         public Task<Lender?> GetByIdAsync(Guid id, CancellationToken ct)
             => _db.Lenders.FirstOrDefaultAsync(x => x.UserId == id, ct);
 
-        public Task SaveChangesAsync(CancellationToken ct) => _db.SaveChangesAsync(ct);
+        public Task SaveChangesAsync(CancellationToken ct)
+            => _db.SaveChangesAsync(ct);
     }
 }

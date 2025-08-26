@@ -1,8 +1,9 @@
 ﻿using MediatR;
 using MoneyMarket.Application.Common.Abstractions;
 using MoneyMarket.Application.Features.CRM.Dtos;
+using MoneyMarket.Application.Features.CRM.Queries;
 
-namespace MoneyMarket.Application.Features.CRM.Queries
+namespace MoneyMarket.Application.Features.CRM.Handlers
 {
     public sealed class GetBorrowerDetailsQueryHandler : IRequestHandler<GetBorrowerDetailsQuery, BorrowerDetailsDto?>
     {
