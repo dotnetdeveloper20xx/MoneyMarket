@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using MoneyMarket.Application.Common.Behaviors;
@@ -10,15 +9,25 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        var asm = Assembly.GetExecutingAssembly();
+        // Safer than GetExecutingAssembly when invoked from different loaders (e.g., tests)
+        var appAssembly = typeof(DependencyInjection).Assembly;
 
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(asm));
-        services.AddValidatorsFromAssembly(asm);
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(appAssembly);
 
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnitOfWorkBehavior<,>));
+            // Pipeline order: outer → inner
+            cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
+            cfg.AddOpenBehavior(typeof(PerformanceBehavior<,>));
+            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+            cfg.AddOpenBehavior(typeof(UnitOfWorkBehavior<,>));
+        });
+
+        // FluentValidation – scan validators in Application
+        services.AddValidatorsFromAssembly(appAssembly);
+
+        // AutoMapper – scan profiles in Application
+        services.AddAutoMapper(appAssembly);
 
         return services;
     }

@@ -27,12 +27,6 @@
     <Folder Include="Features\Auth\Handlers\" />
     <Folder Include="Features\Auth\Mappings\" />
     <Folder Include="Features\Auth\Validators\" />
-    <Folder Include="Features\Borrowers\Commands\" />
-    <Folder Include="Features\Borrowers\Dtos\" />
-    <Folder Include="Features\Borrowers\Handlers\" />
-    <Folder Include="Features\Borrowers\Mappings\" />
-    <Folder Include="Features\Borrowers\Queries\" />
-    <Folder Include="Features\Borrowers\Validators\" />
     <Folder Include="Features\CRM\Commands\" />
     <Folder Include="Features\CRM\Dtos\" />
     <Folder Include="Features\CRM\Handlers\" />

@@ -1,4 +1,6 @@
-﻿namespace MoneyMarket.Infrastructure.Ids
+﻿using MoneyMarket.Application.Common.Abstractions;
+
+namespace MoneyMarket.Infrastructure.Ids
 {
     public sealed class GuidGenerator : IGuidGenerator
     {

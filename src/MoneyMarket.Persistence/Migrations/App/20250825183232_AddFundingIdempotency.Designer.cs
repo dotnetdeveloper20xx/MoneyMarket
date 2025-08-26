@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MoneyMarket.Persistence.Context;
 
@@ -11,9 +12,11 @@ using MoneyMarket.Persistence.Context;
 namespace MoneyMarket.Persistence.Migrations.App
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250825183232_AddFundingIdempotency")]
+    partial class AddFundingIdempotency
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,64 +24,6 @@ namespace MoneyMarket.Persistence.Migrations.App
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("MoneyMarket.Domain.Borrowers.BorrowerProfile", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Age")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("NationalIdNumber")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("BorrowerProfile");
-                });
 
             modelBuilder.Entity("MoneyMarket.Domain.Entities.Borrower", b =>
                 {
@@ -404,121 +349,6 @@ namespace MoneyMarket.Persistence.Migrations.App
                     b.HasKey("Id");
 
                     b.ToTable("ApplicationUser");
-                });
-
-            modelBuilder.Entity("MoneyMarket.Domain.Borrowers.BorrowerProfile", b =>
-                {
-                    b.OwnsOne("MoneyMarket.Domain.Borrowers.Address", "CurrentAddress", b1 =>
-                        {
-                            b1.Property<Guid>("BorrowerProfileId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("City")
-                                .IsRequired()
-                                .HasMaxLength(150)
-                                .HasColumnType("nvarchar(150)");
-
-                            b1.Property<string>("Country")
-                                .IsRequired()
-                                .HasMaxLength(150)
-                                .HasColumnType("nvarchar(150)");
-
-                            b1.Property<string>("House")
-                                .IsRequired()
-                                .HasMaxLength(150)
-                                .HasColumnType("nvarchar(150)");
-
-                            b1.Property<string>("PostCode")
-                                .IsRequired()
-                                .HasMaxLength(50)
-                                .HasColumnType("nvarchar(50)");
-
-                            b1.Property<string>("Street")
-                                .IsRequired()
-                                .HasMaxLength(150)
-                                .HasColumnType("nvarchar(150)");
-
-                            b1.HasKey("BorrowerProfileId");
-
-                            b1.ToTable("BorrowerProfile");
-
-                            b1.WithOwner()
-                                .HasForeignKey("BorrowerProfileId");
-                        });
-
-                    b.OwnsOne("MoneyMarket.Domain.Borrowers.EmploymentInfo", "Employment", b1 =>
-                        {
-                            b1.Property<Guid>("BorrowerProfileId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("AdditionalIncomeSources")
-                                .HasMaxLength(2000)
-                                .HasColumnType("nvarchar(2000)");
-
-                            b1.Property<string>("EmployerName")
-                                .IsRequired()
-                                .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)");
-
-                            b1.Property<decimal>("GrossAnnualIncome")
-                                .HasColumnType("decimal(18,2)");
-
-                            b1.Property<string>("JobTitle")
-                                .IsRequired()
-                                .HasMaxLength(150)
-                                .HasColumnType("nvarchar(150)");
-
-                            b1.Property<string>("LengthOfEmployment")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)");
-
-                            b1.HasKey("BorrowerProfileId");
-
-                            b1.ToTable("BorrowerProfile");
-
-                            b1.WithOwner()
-                                .HasForeignKey("BorrowerProfileId");
-                        });
-
-                    b.OwnsMany("MoneyMarket.Domain.Borrowers.ExistingDebt", "Debts", b1 =>
-                        {
-                            b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<decimal>("Amount")
-                                .HasColumnType("decimal(18,2)");
-
-                            b1.Property<Guid>("BorrowerProfileId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("DebtType")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)");
-
-                            b1.Property<string>("LenderName")
-                                .IsRequired()
-                                .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)");
-
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("BorrowerProfileId");
-
-                            b1.ToTable("BorrowerDebts", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("BorrowerProfileId");
-                        });
-
-                    b.Navigation("CurrentAddress")
-                        .IsRequired();
-
-                    b.Navigation("Debts");
-
-                    b.Navigation("Employment");
                 });
 
             modelBuilder.Entity("MoneyMarket.Domain.Entities.Borrower", b =>

@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MoneyMarket.Application.Common.Abstractions;
 using MoneyMarket.Persistence.Context;
+using MoneyMarket.Persistence.Identity;
 using MoneyMarket.Persistence.Repositories;
 
 namespace MoneyMarket.Persistence;
@@ -12,12 +14,10 @@ public static class DependencyInjection
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration config)
     {
         var conn = config.GetConnectionString("DefaultConnection")
-                   ?? throw new InvalidOperationException("Connection string 'DefaultConnection' missing");
+                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' missing");
 
-        // Identity DB (unchanged)
+        // DbContexts
         services.AddDbContext<IdentityDbContextMM>(o => o.UseSqlServer(conn));
-
-        // App DB
         services.AddDbContext<AppDbContext>(o => o.UseSqlServer(conn));
 
         // Map abstractions
@@ -27,6 +27,19 @@ public static class DependencyInjection
         // Repositories
         services.AddScoped<ILoanRepository, LoanRepository>();
         services.AddScoped<IFundingRepository, FundingRepository>();
+
+        // ASP.NET Identity (this registers UserManager / SignInManager / RoleManager)
+        services
+            .AddIdentityCore<ApplicationUser>(opt =>
+            {
+                opt.Password.RequiredLength = 8;
+                opt.User.RequireUniqueEmail = true;
+            })
+            .AddRoles<ApplicationRole>()
+            .AddEntityFrameworkStores<IdentityDbContextMM>()
+            .AddSignInManager();
+
+        services.AddScoped<IBorrowerRepository, BorrowerRepository>();
 
         return services;
     }
