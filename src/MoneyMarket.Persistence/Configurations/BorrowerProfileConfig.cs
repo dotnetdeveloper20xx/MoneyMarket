@@ -84,7 +84,10 @@ namespace MoneyMarket.Persistence.Configurations
                 a.Property(x => x.NewStatus).HasConversion<int?>();
                
             });
-      
+
+            b.Property(x => x.IsDisabled).HasDefaultValue(false);
+            b.Property(x => x.DisabledReason).HasMaxLength(512);
+
         }
     }
 }

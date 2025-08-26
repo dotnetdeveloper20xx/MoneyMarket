@@ -30,6 +30,12 @@ public class Borrower : AuditableEntity
     private readonly List<Debt> _existingDebts = new();
     public IReadOnlyCollection<Debt> ExistingDebts => _existingDebts.AsReadOnly();
 
+    // CRM control
+    public bool IsDisabled { get; private set; }
+    public string? DisabledReason { get; private set; }
+    public DateTime? DisabledAtUtc { get; private set; }
+     
+
     private Borrower() { }
 
     public static Borrower Register(
@@ -82,5 +88,21 @@ public class Borrower : AuditableEntity
         _existingDebts.Clear();
         _existingDebts.AddRange(debts ?? Array.Empty<Debt>());
         Touch("system");
+    }
+
+    public void Disable(string? reason)
+    {
+        if (IsDisabled) return;
+        IsDisabled = true;
+        DisabledReason = reason;
+        DisabledAtUtc = DateTime.UtcNow;
+    }
+
+    public void Enable()
+    {
+        if (!IsDisabled) return;
+        IsDisabled = false;
+        DisabledReason = null;
+        DisabledAtUtc = null;
     }
 }

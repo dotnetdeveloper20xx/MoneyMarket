@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MoneyMarket.Application.Common.Abstractions;
+using MoneyMarket.Domain.Borrowers;
 using MoneyMarket.Domain.Entities;
+using MoneyMarket.Domain.Lenders;
 
 namespace MoneyMarket.Persistence.Context;
 
@@ -13,6 +15,7 @@ public class AppDbContext : DbContext, IAppDbContext, IUnitOfWork
     public DbSet<Loan> Loans => Set<Loan>();
     public DbSet<Funding> Fundings => Set<Funding>();
     public DbSet<RepaymentInstallment> RepaymentInstallments => Set<RepaymentInstallment>();
+     
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

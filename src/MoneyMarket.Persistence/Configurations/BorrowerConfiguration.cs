@@ -17,7 +17,9 @@ public class BorrowerConfiguration : IEntityTypeConfiguration<Borrower>
         builder.Property(b => b.PhoneNumber).HasMaxLength(150);
         builder.Property(b => b.Email).HasMaxLength(256);
 
-        
+        builder.Property(x => x.IsDisabled).HasDefaultValue(false);
+        builder.Property(x => x.DisabledReason).HasMaxLength(512);
+
         builder.HasOne<ApplicationUser>() 
             .WithMany()
             .HasForeignKey(b => b.UserId)

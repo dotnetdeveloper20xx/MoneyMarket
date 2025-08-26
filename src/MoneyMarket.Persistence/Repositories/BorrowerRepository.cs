@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MoneyMarket.Application.Common.Abstractions;
 using MoneyMarket.Domain.Borrowers;
+using MoneyMarket.Domain.Entities;
 using MoneyMarket.Persistence.Context;
 
 namespace MoneyMarket.Persistence.Repositories
@@ -42,5 +43,22 @@ namespace MoneyMarket.Persistence.Repositories
             if (asNoTracking) q = q.AsNoTracking();
             return await q.SingleOrDefaultAsync(p => p.Id == id, ct);
         }
+
+        public async Task<(IReadOnlyList<Borrower> Items, int Total)> GetPagedAsync(int page, int size, CancellationToken ct)
+        {
+            var query = _db.Borrowers.AsNoTracking();
+            var total = await query.CountAsync(ct);
+            var items = await query
+                .OrderBy(x => x.Email)
+                .Skip((page - 1) * size)
+                .Take(size)
+                .ToListAsync(ct);
+            return (items, total);
+        }
+
+        public Task<Borrower?> GetByIdAsync(Guid id, CancellationToken ct)
+            => _db.Borrowers.FirstOrDefaultAsync(x => x.UserId == id, ct);
+
+        public Task SaveChangesAsync(CancellationToken ct) => _db.SaveChangesAsync(ct);
     }
 }

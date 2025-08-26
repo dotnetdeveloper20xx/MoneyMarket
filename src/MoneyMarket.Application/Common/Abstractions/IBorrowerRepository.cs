@@ -1,4 +1,5 @@
 ﻿using MoneyMarket.Domain.Borrowers;
+using MoneyMarket.Domain.Entities;
 
 namespace MoneyMarket.Application.Common.Abstractions
 {
@@ -10,7 +11,10 @@ namespace MoneyMarket.Application.Common.Abstractions
 
         // Convenience helpers (optional but handy)
         Task<bool> ExistsForUserAsync(string userId, CancellationToken ct);
-
         Task<BorrowerProfile?> GetByIdAsync(Guid id, bool asNoTracking, CancellationToken ct);
+        Task<(IReadOnlyList<Borrower> Items, int Total)> GetPagedAsync(int page, int size, CancellationToken ct);
+        Task<Borrower?> GetByIdAsync(Guid id, CancellationToken ct);
+        Task SaveChangesAsync(CancellationToken ct);
+
     }
 }

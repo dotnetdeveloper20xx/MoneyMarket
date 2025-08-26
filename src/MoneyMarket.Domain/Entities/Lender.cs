@@ -9,6 +9,8 @@ public class Lender : AuditableEntity
     // 🔗 Link to identity user
     public Guid UserId { get; private set; }
 
+    public string Email { get; private set; } = string.Empty;
+
     // Business & compliance
     public string BusinessName { get; private set; } = string.Empty;
     public string RegistrationNumber { get; private set; } = string.Empty;
@@ -18,6 +20,12 @@ public class Lender : AuditableEntity
     public decimal TotalFunded { get; private set; }
     public decimal TotalProfit { get; private set; }
     public int LoansFundedCount { get; private set; }
+
+    // CRM actions
+    public bool IsDisabled { get; private set; }
+    public string? DisabledReason { get; private set; }
+    public DateTime? DisabledAtUtc { get; private set; }
+     
 
     private Lender() { }
 
@@ -43,5 +51,21 @@ public class Lender : AuditableEntity
         TotalFunded += decimal.Round(amount, 2);
         TotalProfit += decimal.Round(lenderShare, 2);
         Touch("system");
+    }
+
+    public void Disable(string? reason)
+    {
+        if (IsDisabled) return;
+        IsDisabled = true;
+        DisabledReason = reason;
+        DisabledAtUtc = DateTime.UtcNow;
+    }
+
+    public void Enable()
+    {
+        if (!IsDisabled) return;
+        IsDisabled = false;
+        DisabledReason = null;
+        DisabledAtUtc = null;
     }
 }

@@ -9,7 +9,10 @@ public class LenderConfiguration : IEntityTypeConfiguration<Lender>
 {
     public void Configure(EntityTypeBuilder<Lender> builder)
     {
-        builder.HasKey(l => l.LenderId);
+        builder.HasKey(l => l.LenderId);        
+        builder.Property(x => x.IsDisabled).HasDefaultValue(false);
+        builder.Property(x => x.DisabledReason).HasMaxLength(512);
+        builder.Property(x => x.Email).HasMaxLength(256);
 
         builder.Property(l => l.BusinessName).HasMaxLength(200);
         builder.Property(l => l.RegistrationNumber).HasMaxLength(100);

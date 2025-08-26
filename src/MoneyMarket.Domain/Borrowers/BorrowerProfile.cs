@@ -33,6 +33,10 @@ public sealed class BorrowerProfile
     private readonly List<AuditTrailEntry> _auditTrail = new();
     public IReadOnlyCollection<AuditTrailEntry> AuditTrail => _auditTrail.AsReadOnly();
 
+    public bool IsDisabled { get; private set; }
+    public string? DisabledReason { get; private set; }
+    public DateTime? DisabledAtUtc { get; private set; }
+
     private BorrowerProfile() { }
 
     public static BorrowerProfile CreateDraft(
