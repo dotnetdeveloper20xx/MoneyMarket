@@ -5,20 +5,18 @@ namespace MoneyMarket.Domain.Lenders
     public sealed class LenderApplication : AuditableEntity
     {
         public Guid LenderApplicationId { get; private set; } = Guid.NewGuid();
-        public Guid UserId { get; private set; }                         // links to Identity
+        public Guid UserId { get; private set; }
         public string Email { get; private set; } = string.Empty;
 
-        // Step 1 – Legal & Business Registration
         public BusinessRegistrationInfo? BusinessRegistration { get; private set; }
-
-        // Step 2 – Financial Capacity
         public FinancialCapacityInfo? FinancialCapacity { get; private set; }
-
-        // Step 3 – Operational & Risk Management
         public RiskManagementInfo? RiskManagement { get; private set; }
 
-        public LenderApplicationStatus Status { get; private set; } = LenderApplicationStatus.Draft;       
+        public LenderApplicationStatus Status { get; private set; } = LenderApplicationStatus.Draft;
         public DateTime? UpdatedAtUtc { get; private set; }
+
+        // Concurrency token (optional but recommended)
+        public byte[]? RowVersion { get; private set; }
 
         private LenderApplication() { }
 
@@ -69,22 +67,20 @@ namespace MoneyMarket.Domain.Lenders
         {
             if (Status != LenderApplicationStatus.Submitted)
                 throw new InvalidOperationException("Only Submitted applications can be rejected.");
-            // You may persist reason in an Audit table later
             Status = LenderApplicationStatus.Rejected;
             Touch(actor);
-        }       
+        }
     }
 
-
     public sealed record BusinessRegistrationInfo(
-    string BusinessName,
-    string RegistrationNumber,
-    IReadOnlyList<string> ProofOfIncorporationDocuments,
-    IReadOnlyList<string> LendingLicenses,
-    string ComplianceStatement);
+        string BusinessName,
+        string RegistrationNumber,
+        IReadOnlyList<string> ProofOfIncorporationDocuments,
+        IReadOnlyList<string> LendingLicenses,
+        string ComplianceStatement);
 
     public sealed record FinancialCapacityInfo(
-        string FundingSourceType,           // enum as string for now
+        string FundingSourceType,
         string FundingSourceDescription,
         IReadOnlyList<string> CapitalReserveDocuments);
 

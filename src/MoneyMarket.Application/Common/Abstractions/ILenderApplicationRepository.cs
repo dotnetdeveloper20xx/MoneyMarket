@@ -7,7 +7,8 @@ namespace MoneyMarket.Application.Common.Abstractions
         Task<LenderApplication?> GetMineAsync(Guid userId, bool asNoTracking, CancellationToken ct);
         Task<LenderApplication?> GetByIdAsync(Guid id, bool asNoTracking, CancellationToken ct);
         Task AddAsync(LenderApplication app, CancellationToken ct);
+        Task<bool> ExistsForUserAsync(Guid userId, CancellationToken ct);
         void Update(LenderApplication app);
-        Task SaveChangesAsync(CancellationToken ct);
+        Task SaveChangesAsync(CancellationToken ct); // UoW style
     }
 }

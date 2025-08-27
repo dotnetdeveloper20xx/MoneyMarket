@@ -24,7 +24,7 @@ namespace MoneyMarket.Application.Features.Lenders.Handlers
 
             app.Submit(email);
             _repo.Update(app);
-            await _repo.SaveChangesAsync(ct);
+          
 
             return new LenderApplicationSummaryDto(app.LenderApplicationId, app.Status, app.Email, app.CreatedAtUtc, app.UpdatedAtUtc);
         }

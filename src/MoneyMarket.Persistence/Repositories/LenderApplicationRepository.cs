@@ -21,5 +21,11 @@ namespace MoneyMarket.Persistence.Repositories
         public Task AddAsync(LenderApplication app, CancellationToken ct) => _db.LenderApplications.AddAsync(app, ct).AsTask();
         public void Update(LenderApplication app) => _db.LenderApplications.Update(app);
         public Task SaveChangesAsync(CancellationToken ct) => _db.SaveChangesAsync(ct);
+
+        public async Task<bool> ExistsForUserAsync(Guid userId, CancellationToken ct)
+        {
+            return await _db.LenderApplications
+                .AnyAsync(x => x.UserId == userId, ct);
+        }
     }
 }

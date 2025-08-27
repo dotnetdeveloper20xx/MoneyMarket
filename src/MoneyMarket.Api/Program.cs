@@ -10,6 +10,7 @@ using MoneyMarket.Api.Common.Services;              // CurrentUserService
 using MoneyMarket.Application;                       // AddApplication()
 using MoneyMarket.Application.Common.Abstractions;  // ICurrentUserService
 using MoneyMarket.Application.Common.Behaviors;     // (for types if needed in compile)
+using MoneyMarket.Application.Common.Exceptions;
 using MoneyMarket.Application.Common.Models;        // ApiResponse<>
 using MoneyMarket.Infrastructure;                   // AddInfrastructure()
 using MoneyMarket.Infrastructure.Identity;          // IdentityService
@@ -76,22 +77,60 @@ builder.Services.AddApplication();                       // MediatR, Validators,
 builder.Services.AddInfrastructure(builder.Configuration); // DateTime/Guid/etc.
 builder.Services.AddPersistence(builder.Configuration);    // DbContexts, Repositories, UoW
 
+
 // ─────────────────────────────────────────────
-// ProblemDetails
+// ProblemDetails middleware
 // ─────────────────────────────────────────────
 builder.Services.AddProblemDetails(options =>
 {
-    options.MapToStatusCode<ArgumentNullException>(StatusCodes.Status400BadRequest);
-    options.MapToStatusCode<UnauthorizedAccessException>(StatusCodes.Status401Unauthorized);
-    options.MapToStatusCode<InvalidOperationException>(StatusCodes.Status409Conflict);
-    options.MapToStatusCode<Exception>(StatusCodes.Status500InternalServerError);
+    // Map specific known exceptions to HTTP status codes
+    options.Map<NotFoundException>(ex => new Microsoft.AspNetCore.Mvc.ProblemDetails
+    {
+        Title = "Not Found",
+        Status = StatusCodes.Status404NotFound,
+        Detail = ex.Message
+    });
 
-    options.Map<ValidationException>(ex => new Microsoft.AspNetCore.Mvc.ProblemDetails
+    options.Map<ConflictException>(ex => new Microsoft.AspNetCore.Mvc.ProblemDetails
+    {
+        Title = "Conflict",
+        Status = StatusCodes.Status409Conflict,
+        Detail = ex.Message
+    });
+
+    options.Map<ForbiddenAccessException>(ex => new Microsoft.AspNetCore.Mvc.ProblemDetails
+    {
+        Title = "Forbidden",
+        Status = StatusCodes.Status403Forbidden,
+        Detail = ex.Message
+    });
+
+    // Auth-related
+    options.MapToStatusCode<UnauthorizedAccessException>(StatusCodes.Status401Unauthorized);
+
+    // Argument-level problems → 400
+    options.MapToStatusCode<ArgumentNullException>(StatusCodes.Status400BadRequest);
+    options.MapToStatusCode<ArgumentException>(StatusCodes.Status400BadRequest);
+
+    // FluentValidation errors → 400, include messages
+    options.Map<FluentValidation.ValidationException>(ex => new Microsoft.AspNetCore.Mvc.ProblemDetails
     {
         Title = "Validation failed",
         Status = StatusCodes.Status400BadRequest,
         Detail = string.Join("; ", ex.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"))
     });
+
+    // Optional: your own Application.ValidationException (if you’ve created it)
+    options.Map<MoneyMarket.Application.Common.Exceptions.ValidationException>(ex =>
+        new Microsoft.AspNetCore.Mvc.ProblemDetails
+        {
+            Title = "Validation failed",
+            Status = StatusCodes.Status400BadRequest,
+            Detail = ex.Message
+        });
+
+    // Last resort — anything else → 500
+    options.MapToStatusCode<Exception>(StatusCodes.Status500InternalServerError);
 });
 
 // ─────────────────────────────────────────────
@@ -123,7 +162,9 @@ var app = builder.Build();
 // ─────────────────────────────────────────────
 // Middleware pipeline
 // ─────────────────────────────────────────────
+
 app.UseProblemDetails();
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

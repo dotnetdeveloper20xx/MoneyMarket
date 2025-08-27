@@ -41,6 +41,13 @@ namespace MoneyMarket.Persistence.Configurations
                 nb.Property(p => p.DefaultHandlingStrategy).HasColumnType("nvarchar(max)");
                 nb.Property(p => p.PricingStrategy).HasColumnType("nvarchar(max)");
             });
+
+
+            b.HasKey(x => x.LenderApplicationId);
+            b.Property(x => x.RowVersion)
+             .IsRowVersion()
+             .IsConcurrencyToken();
+            
         }
     }
 }

@@ -38,7 +38,7 @@ namespace MoneyMarket.Application.Features.Lenders.Handlers
             else
                 _repo.Update(app);
 
-            await _repo.SaveChangesAsync(ct);
+         
 
             return ToSummary(app);
         }
