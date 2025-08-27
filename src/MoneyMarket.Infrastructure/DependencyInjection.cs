@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MoneyMarket.Application.Common.Abstractions;
 using MoneyMarket.Infrastructure.Email;
 using MoneyMarket.Infrastructure.Files;
+using MoneyMarket.Infrastructure.Identity;
 using MoneyMarket.Infrastructure.Ids;
 using MoneyMarket.Infrastructure.Notifications;
 
@@ -29,6 +30,8 @@ public static class DependencyInjection
         services.AddScoped<IEmailSender, ConsoleEmailSender /* or SendGridEmailSender */>();
 
         services.AddSingleton<INotificationService, NoOpNotificationService>();
+
+        services.AddScoped<IIdentityService, IdentityService>();
 
         return services;
     }

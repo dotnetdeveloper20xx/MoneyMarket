@@ -42,5 +42,29 @@ namespace MoneyMarket.Infrastructure.Identity
             var token = _jwt.CreateToken(user.Id.ToString(), email, roles);
             return (true, token, Array.Empty<string>());
         }
+
+        public async Task AddUserToRoleAsync(Guid userId, string role, CancellationToken ct)
+        {
+            // Note: ASP.NET Identity APIs don’t take CancellationToken; we ignore 'ct' here
+            var user = await _users.FindByIdAsync(userId.ToString());
+            if (user is null)
+                throw new InvalidOperationException("User not found.");
+
+            if (!await _roles.RoleExistsAsync(role))
+            {
+                var createRole = await _roles.CreateAsync(new ApplicationRole { Name = role });
+                if (!createRole.Succeeded)
+                    throw new InvalidOperationException("Failed to create role: " +
+                        string.Join(", ", createRole.Errors.Select(e => e.Description)));
+            }
+
+            if (!await _users.IsInRoleAsync(user, role))
+            {
+                var result = await _users.AddToRoleAsync(user, role);
+                if (!result.Succeeded)
+                    throw new InvalidOperationException("Failed to add user to role: " +
+                        string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
+        }
     }
 }

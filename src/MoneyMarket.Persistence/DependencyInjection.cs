@@ -26,8 +26,8 @@ public static class DependencyInjection
 
         // Repositories
         services.AddScoped<ILoanRepository, LoanRepository>();
-        services.AddScoped<IFundingRepository, FundingRepository>();     
-        
+        services.AddScoped<IFundingRepository, FundingRepository>();  
+        services.AddScoped<ILenderProfileRepository, LenderProfileRepository>();
 
         // ASP.NET Identity (this registers UserManager / SignInManager / RoleManager)
         services

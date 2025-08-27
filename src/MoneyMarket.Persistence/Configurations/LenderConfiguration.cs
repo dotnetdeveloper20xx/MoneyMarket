@@ -18,10 +18,14 @@ public class LenderConfiguration : IEntityTypeConfiguration<Lender>
         builder.Property(l => l.RegistrationNumber).HasMaxLength(100);
         builder.Property(l => l.ComplianceStatement).HasMaxLength(500);
 
-        // 🔗 Relationship to Identity User
+        //  Relationship to Identity User
         builder.HasOne<ApplicationUser>()
             .WithMany()
             .HasForeignKey(l => l.UserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Property(x => x.PhotoPath)            
+                     .HasMaxLength(1024)
+                     .IsRequired(false);
     }
 }
