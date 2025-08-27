@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MoneyMarket.Application.Features.Lenders.Commands;
 using MoneyMarket.Application.Features.Lenders.Dtos;
+using MoneyMarket.Application.Features.Lenders.Queries;
 
 namespace MoneyMarket.API.Controllers.Lenders
 {
@@ -39,5 +40,14 @@ namespace MoneyMarket.API.Controllers.Lenders
             [FromBody] UpsertRiskManagementDto dto,
             CancellationToken ct)
             => _mediator.Send(new UpsertLenderRiskCommand(dto), ct);
+
+        
+        [HttpPost("submit")]
+        public Task<LenderApplicationSummaryDto> Submit(CancellationToken ct)
+            => _mediator.Send(new SubmitLenderApplicationCommand(), ct);
+
+        [HttpGet("me")]
+        public Task<LenderApplicationSummaryDto?> GetMine(CancellationToken ct)
+              => _mediator.Send(new GetMyLenderApplicationQuery(), ct);
     }
 }

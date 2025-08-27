@@ -12,3 +12,4 @@ namespace MoneyMarket.Application.Common.Abstractions
         Task SaveChangesAsync(CancellationToken ct); // UoW style
     }
 }
+
