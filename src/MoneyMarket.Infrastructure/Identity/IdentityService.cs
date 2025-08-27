@@ -66,5 +66,23 @@ namespace MoneyMarket.Infrastructure.Identity
                         string.Join(", ", result.Errors.Select(e => e.Description)));
             }
         }
+
+        public async Task<Guid> GetUserIdGuidByEmailAsync(string email, CancellationToken ct)
+        {
+            var user = await _users.FindByEmailAsync(email)
+                       ?? throw new InvalidOperationException($"Identity user not found for email '{email}'.");
+
+            // Handle both Identity key styles: Guid or string
+            object idObj = user.Id!;
+
+            if (idObj is Guid gid)
+                return gid;
+
+            if (idObj is string sid && Guid.TryParse(sid, out var parsed))
+                return parsed;
+
+            throw new InvalidOperationException(
+                $"Unsupported ApplicationUser.Id type '{idObj.GetType().Name}'. Expected Guid or a Guid-formatted string.");
+        }
     }
 }

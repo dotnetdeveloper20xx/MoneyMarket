@@ -1,6 +1,6 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
-using MoneyMarket.Application.Common.Abstractions;
+﻿using MoneyMarket.Application.Common.Abstractions;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace MoneyMarket.Api.Common.Services;
 
@@ -12,8 +12,12 @@ public sealed class CurrentUserService : ICurrentUserService
     private ClaimsPrincipal? User => _accessor.HttpContext?.User;
 
     public bool IsAuthenticated => User?.Identity?.IsAuthenticated ?? false;
-    public string? UserId => User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? User?.FindFirstValue("sub");
-    public string? Email => User?.FindFirstValue(ClaimTypes.Email);
+    public string? UserId =>
+      _accessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)
+      ?? _accessor.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+    public string? Email =>
+        _accessor.HttpContext?.User.FindFirstValue(ClaimTypes.Email)
+        ?? _accessor.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Email);
     public IReadOnlyList<string> Roles => User?.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList() ?? new List<string>();
 
     public bool IsInRole(string role) => User?.IsInRole(role) ?? false;
