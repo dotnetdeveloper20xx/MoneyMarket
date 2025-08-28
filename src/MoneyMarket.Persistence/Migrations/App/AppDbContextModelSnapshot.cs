@@ -22,6 +22,109 @@ namespace MoneyMarket.Persistence.Migrations.App
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", (string)null);
+                });
+
             modelBuilder.Entity("MoneyMarket.Domain.Borrowers.BorrowerProfile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -84,16 +187,15 @@ namespace MoneyMarket.Persistence.Migrations.App
                     b.Property<DateTime>("UpdatedAtUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("BorrowerProfile");
+                    b.ToTable("BorrowerProfiles", (string)null);
                 });
 
             modelBuilder.Entity("MoneyMarket.Domain.Entities.Borrower", b =>
@@ -181,9 +283,10 @@ namespace MoneyMarket.Persistence.Migrations.App
 
                     b.HasKey("BorrowerId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_Borrowers_UserId");
 
-                    b.ToTable("Borrowers");
+                    b.ToTable("Borrowers", (string)null);
                 });
 
             modelBuilder.Entity("MoneyMarket.Domain.Entities.Funding", b =>
@@ -228,13 +331,13 @@ namespace MoneyMarket.Persistence.Migrations.App
 
                     b.Property<string>("BusinessName")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("ComplianceStatement")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
@@ -246,8 +349,7 @@ namespace MoneyMarket.Persistence.Migrations.App
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DisabledReason")
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -255,9 +357,7 @@ namespace MoneyMarket.Persistence.Migrations.App
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<bool>("IsDisabled")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastModifiedAtUtc")
                         .HasColumnType("datetime2");
@@ -274,8 +374,8 @@ namespace MoneyMarket.Persistence.Migrations.App
 
                     b.Property<string>("RegistrationNumber")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<decimal>("TotalFunded")
                         .HasColumnType("decimal(18,2)");
@@ -288,9 +388,11 @@ namespace MoneyMarket.Persistence.Migrations.App
 
                     b.HasKey("LenderId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Lenders_UserId");
 
-                    b.ToTable("Lenders");
+                    b.ToTable("Lenders", (string)null);
                 });
 
             modelBuilder.Entity("MoneyMarket.Domain.Entities.Loan", b =>
@@ -416,7 +518,8 @@ namespace MoneyMarket.Persistence.Migrations.App
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<DateTime?>("LastModifiedAtUtc")
                         .HasColumnType("datetime2");
@@ -440,7 +543,10 @@ namespace MoneyMarket.Persistence.Migrations.App
 
                     b.HasKey("LenderApplicationId");
 
-                    b.ToTable("LenderApplications");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_LenderApplications_UserId");
+
+                    b.ToTable("LenderApplications", (string)null);
                 });
 
             modelBuilder.Entity("MoneyMarket.Domain.Lenders.LenderProduct", b =>
@@ -535,6 +641,34 @@ namespace MoneyMarket.Persistence.Migrations.App
                     b.ToTable("LenderProfile");
                 });
 
+            modelBuilder.Entity("MoneyMarket.Persistence.Identity.ApplicationRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
+                });
+
             modelBuilder.Entity("MoneyMarket.Persistence.Identity.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -545,10 +679,12 @@ namespace MoneyMarket.Persistence.Migrations.App
                         .HasColumnType("int");
 
                     b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
@@ -560,10 +696,12 @@ namespace MoneyMarket.Persistence.Migrations.App
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("NormalizedEmail")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("NormalizedUserName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
@@ -581,15 +719,82 @@ namespace MoneyMarket.Persistence.Migrations.App
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ApplicationUser");
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.HasOne("MoneyMarket.Persistence.Identity.ApplicationRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.HasOne("MoneyMarket.Persistence.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.HasOne("MoneyMarket.Persistence.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.HasOne("MoneyMarket.Persistence.Identity.ApplicationRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MoneyMarket.Persistence.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.HasOne("MoneyMarket.Persistence.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("MoneyMarket.Domain.Borrowers.BorrowerProfile", b =>
                 {
+                    b.HasOne("MoneyMarket.Persistence.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_BorrowerProfiles_AspNetUsers_UserId");
+
                     b.OwnsOne("MoneyMarket.Domain.Borrowers.Address", "CurrentAddress", b1 =>
                         {
                             b1.Property<Guid>("BorrowerProfileId")
@@ -622,7 +827,7 @@ namespace MoneyMarket.Persistence.Migrations.App
 
                             b1.HasKey("BorrowerProfileId");
 
-                            b1.ToTable("BorrowerProfile");
+                            b1.ToTable("BorrowerProfiles");
 
                             b1.WithOwner()
                                 .HasForeignKey("BorrowerProfileId");
@@ -663,7 +868,7 @@ namespace MoneyMarket.Persistence.Migrations.App
 
                             b1.HasIndex("BorrowerProfileId");
 
-                            b1.ToTable("BorrowerAuditTrail", (string)null);
+                            b1.ToTable("BorrowerProfileAuditTrail", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("BorrowerProfileId");
@@ -697,7 +902,7 @@ namespace MoneyMarket.Persistence.Migrations.App
 
                             b1.HasIndex("BorrowerProfileId");
 
-                            b1.ToTable("BorrowerDocuments", (string)null);
+                            b1.ToTable("BorrowerProfileDocuments", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("BorrowerProfileId");
@@ -732,7 +937,7 @@ namespace MoneyMarket.Persistence.Migrations.App
 
                             b1.HasKey("BorrowerProfileId");
 
-                            b1.ToTable("BorrowerProfile");
+                            b1.ToTable("BorrowerProfiles");
 
                             b1.WithOwner()
                                 .HasForeignKey("BorrowerProfileId");
@@ -763,7 +968,7 @@ namespace MoneyMarket.Persistence.Migrations.App
 
                             b1.HasIndex("BorrowerProfileId");
 
-                            b1.ToTable("BorrowerDebts", (string)null);
+                            b1.ToTable("BorrowerProfileDebts", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("BorrowerProfileId");
@@ -787,7 +992,8 @@ namespace MoneyMarket.Persistence.Migrations.App
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_Borrowers_AspNetUsers_UserId");
 
                     b.OwnsOne("MoneyMarket.Domain.ValueObjects.Address", "Address", b1 =>
                         {
@@ -845,7 +1051,7 @@ namespace MoneyMarket.Persistence.Migrations.App
 
                             b1.HasKey("BorrowerId", "LenderName", "DebtType");
 
-                            b1.ToTable("Debt");
+                            b1.ToTable("BorrowerDebts", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("BorrowerId");
@@ -882,7 +1088,8 @@ namespace MoneyMarket.Persistence.Migrations.App
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_Lenders_AspNetUsers_UserId");
                 });
 
             modelBuilder.Entity("MoneyMarket.Domain.Entities.RepaymentInstallment", b =>
@@ -896,6 +1103,13 @@ namespace MoneyMarket.Persistence.Migrations.App
 
             modelBuilder.Entity("MoneyMarket.Domain.Lenders.LenderApplication", b =>
                 {
+                    b.HasOne("MoneyMarket.Persistence.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_LenderApplications_AspNetUsers_UserId");
+
                     b.OwnsOne("MoneyMarket.Domain.Lenders.BusinessRegistrationInfo", "BusinessRegistration", b1 =>
                         {
                             b1.Property<Guid>("LenderApplicationId")
@@ -903,23 +1117,25 @@ namespace MoneyMarket.Persistence.Migrations.App
 
                             b1.Property<string>("BusinessName")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .HasMaxLength(256)
+                                .HasColumnType("nvarchar(256)");
 
                             b1.Property<string>("ComplianceStatement")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
-                            b1.PrimitiveCollection<string>("LendingLicenses")
+                            b1.Property<string>("LendingLicenses")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
-                            b1.PrimitiveCollection<string>("ProofOfIncorporationDocuments")
+                            b1.Property<string>("ProofOfIncorporationDocuments")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
                             b1.Property<string>("RegistrationNumber")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .HasMaxLength(128)
+                                .HasColumnType("nvarchar(128)");
 
                             b1.HasKey("LenderApplicationId");
 
@@ -934,7 +1150,7 @@ namespace MoneyMarket.Persistence.Migrations.App
                             b1.Property<Guid>("LenderApplicationId")
                                 .HasColumnType("uniqueidentifier");
 
-                            b1.PrimitiveCollection<string>("CapitalReserveDocuments")
+                            b1.Property<string>("CapitalReserveDocuments")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
@@ -944,7 +1160,8 @@ namespace MoneyMarket.Persistence.Migrations.App
 
                             b1.Property<string>("FundingSourceType")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
 
                             b1.HasKey("LenderApplicationId");
 
@@ -975,7 +1192,7 @@ namespace MoneyMarket.Persistence.Migrations.App
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
-                            b1.PrimitiveCollection<string>("RiskAssessmentTools")
+                            b1.Property<string>("RiskAssessmentTools")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 

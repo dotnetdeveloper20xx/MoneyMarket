@@ -24,7 +24,7 @@ namespace MoneyMarket.Application.Features.Borrowers.Handlers
             profile.Submit(_clock.UtcNow, uid);
             _repo.Update(profile);
 
-            await _mediator.Publish(new ProfileSubmittedEvent(profile.Id, profile.UserId, profile.Email), ct);
+            await _mediator.Publish(new ProfileSubmittedEvent(profile.Id, profile.UserId.ToString(), profile.Email), ct);
             return ApiResponse<bool>.SuccessResult(true, "Profile submitted.");
         }
     }

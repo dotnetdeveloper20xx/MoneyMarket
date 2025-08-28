@@ -5,27 +5,28 @@ using MoneyMarket.Persistence.Identity;
 
 namespace MoneyMarket.Persistence.Configurations;
 
-public class LenderConfiguration : IEntityTypeConfiguration<Lender>
+public sealed class LenderConfiguration : IEntityTypeConfiguration<Lender>
 {
-    public void Configure(EntityTypeBuilder<Lender> builder)
+    public void Configure(EntityTypeBuilder<Lender> b)
     {
-        builder.HasKey(l => l.LenderId);        
-        builder.Property(x => x.IsDisabled).HasDefaultValue(false);
-        builder.Property(x => x.DisabledReason).HasMaxLength(512);
-        builder.Property(x => x.Email).HasMaxLength(256);
+        b.ToTable("Lenders");
+        b.HasKey(x => x.LenderId);
 
-        builder.Property(l => l.BusinessName).HasMaxLength(200);
-        builder.Property(l => l.RegistrationNumber).HasMaxLength(100);
-        builder.Property(l => l.ComplianceStatement).HasMaxLength(500);
+        b.Property(x => x.Email).HasMaxLength(256);
+        b.Property(x => x.BusinessName).HasMaxLength(256);
+        b.Property(x => x.RegistrationNumber).HasMaxLength(128);
+        b.Property(x => x.ComplianceStatement).HasMaxLength(2048);
+        b.Property(x => x.PhotoPath).HasMaxLength(1024);
 
-        //  Relationship to Identity User
-        builder.HasOne<ApplicationUser>()
-            .WithMany()
-            .HasForeignKey(l => l.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
+        // One profile per user? If yes, keep IsUnique(); otherwise remove it.
+        b.HasIndex(x => x.UserId)
+         .IsUnique()
+         .HasDatabaseName("IX_Lenders_UserId");
 
-        builder.Property(x => x.PhotoPath)            
-                     .HasMaxLength(1024)
-                     .IsRequired(false);
+        b.HasOne<ApplicationUser>()
+         .WithMany()
+         .HasForeignKey(x => x.UserId)
+         .HasConstraintName("FK_Lenders_AspNetUsers_UserId")
+         .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -14,22 +14,16 @@ public static class DependencyInjection
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration config)
     {
         var conn = config.GetConnectionString("DefaultConnection")
-                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' missing");
+                  ?? throw new InvalidOperationException("Connection string 'DefaultConnection' missing");
 
-        // DbContexts
-        services.AddDbContext<IdentityDbContextMM>(o => o.UseSqlServer(conn));
+        // ONE DbContext for everything (Identity + App)
         services.AddDbContext<AppDbContext>(o => o.UseSqlServer(conn));
 
-        // Map abstractions
+        // Map abstractions to unified context
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AppDbContext>());
 
-        // Repositories
-        services.AddScoped<ILoanRepository, LoanRepository>();
-        services.AddScoped<IFundingRepository, FundingRepository>();  
-        services.AddScoped<ILenderProfileRepository, LenderProfileRepository>();
-
-        // ASP.NET Identity (this registers UserManager / SignInManager / RoleManager)
+        // ASP.NET Identity over unified context (Guid keys) — single registration
         services
             .AddIdentityCore<ApplicationUser>(opt =>
             {
@@ -37,18 +31,21 @@ public static class DependencyInjection
                 opt.User.RequireUniqueEmail = true;
             })
             .AddRoles<ApplicationRole>()
-            .AddEntityFrameworkStores<IdentityDbContextMM>()
+            .AddEntityFrameworkStores<AppDbContext>()
             .AddSignInManager();
 
+        // Repositories
+        services.AddScoped<ILoanRepository, LoanRepository>();
+        services.AddScoped<IFundingRepository, FundingRepository>();
+        services.AddScoped<ILenderProfileRepository, LenderProfileRepository>(); // if this wraps Lender
         services.AddScoped<IBorrowerRepository, BorrowerRepository>();
         services.AddScoped<ILenderRepository, LenderRepository>();
-
         services.AddScoped<ILenderApplicationRepository, LenderApplicationRepository>();
         services.AddScoped<ILenderProductRepository, LenderProductRepository>();
 
-
         return services;
     }
+
 }
 
 // Helper to centralize migration/seeding in Program.cs
@@ -56,8 +53,8 @@ public static class PersistenceMigrationRunner
 {
     public static async Task RunAsync(IServiceProvider sp)
     {
-        var idCtx = sp.GetRequiredService<IdentityDbContextMM>();
-        await idCtx.Database.MigrateAsync();
+        //var idCtx = sp.GetRequiredService<IdentityDbContextMM>();
+        //await idCtx.Database.MigrateAsync();
 
         var appCtx = sp.GetRequiredService<AppDbContext>();
         await appCtx.Database.MigrateAsync();

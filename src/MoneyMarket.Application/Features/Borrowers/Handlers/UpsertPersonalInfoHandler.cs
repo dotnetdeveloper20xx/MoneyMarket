@@ -26,8 +26,8 @@ namespace MoneyMarket.Application.Features.Borrowers.Handlers
 
         public async Task<ApiResponse<bool>> Handle(UpsertPersonalInfoCommand request, CancellationToken ct)
         {
-            var uid = _currentUser.UserId ?? throw new InvalidOperationException("User not found in context.");
-            var existing = await _repo.GetByUserIdAsync(uid, asNoTracking: false, ct);
+            var uid = _currentUser.GetRequiredUserIdGuid();
+            var existing = await _repo.GetByUserIdAsync(uid.ToString(), asNoTracking: false, ct);
 
             var address = _mapper.Map<Address>(request.Data.Address);
 

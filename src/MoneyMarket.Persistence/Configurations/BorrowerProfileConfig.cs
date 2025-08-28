@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MoneyMarket.Domain.Borrowers;
+using MoneyMarket.Persistence.Identity;
 
 namespace MoneyMarket.Persistence.Configurations
 {
@@ -8,24 +9,41 @@ namespace MoneyMarket.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<BorrowerProfile> b)
         {
+            b.ToTable("BorrowerProfiles");
+
             b.HasKey(x => x.Id);
             b.HasIndex(x => x.UserId).IsUnique();
 
+            // FK → AspNetUsers(Id), GUID keys
+            b.HasOne<ApplicationUser>()
+             .WithMany()
+             .HasForeignKey(x => x.UserId)
+             .HasConstraintName("FK_BorrowerProfiles_AspNetUsers_UserId")
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // Scalars
             b.Property(x => x.FirstName).HasMaxLength(150).IsRequired();
             b.Property(x => x.LastName).HasMaxLength(150).IsRequired();
             b.Property(x => x.NationalIdNumber).HasMaxLength(150).IsRequired();
             b.Property(x => x.PhoneNumber).HasMaxLength(150).IsRequired();
             b.Property(x => x.Email).HasMaxLength(256).IsRequired();
+            b.Property(x => x.PhotoPath).HasMaxLength(1024);
+            b.Property(x => x.Status).HasConversion<int>();
+            b.Property(x => x.IsDisabled).HasDefaultValue(false);
+            b.Property(x => x.DisabledReason).HasMaxLength(512);
 
+            // Owned: Address (same table)
             b.OwnsOne(x => x.CurrentAddress, a =>
             {
                 a.Property(p => p.House).HasMaxLength(150).IsRequired();
                 a.Property(p => p.Street).HasMaxLength(150).IsRequired();
                 a.Property(p => p.City).HasMaxLength(150).IsRequired();
-                a.Property(p => p.Country).HasMaxLength(150).IsRequired();
                 a.Property(p => p.PostCode).HasMaxLength(50).IsRequired();
+                a.Property(p => p.Country).HasMaxLength(150).IsRequired();
             });
+            b.Navigation(x => x.CurrentAddress).IsRequired();
 
+            // Owned: Employment (same table)
             b.OwnsOne(x => x.Employment, e =>
             {
                 e.Property(p => p.EmployerName).HasMaxLength(200);
@@ -34,60 +52,56 @@ namespace MoneyMarket.Persistence.Configurations
                 e.Property(p => p.GrossAnnualIncome).HasColumnType("decimal(18,2)");
                 e.Property(p => p.AdditionalIncomeSources).HasMaxLength(2000);
             });
-
-            b.Navigation(x => x.CurrentAddress).IsRequired();
             b.Navigation(x => x.Employment).IsRequired(false);
 
-            // Debts (owned collection)
+            // Debts (owned collection) — ExistingDebt has Guid Id
             b.OwnsMany(x => x.Debts, d =>
             {
-                d.ToTable("BorrowerDebts");
+                d.ToTable("BorrowerProfileDebts");
                 d.WithOwner().HasForeignKey("BorrowerProfileId");
+
                 d.HasKey(x => x.Id);
-                d.Property(x => x.Id).ValueGeneratedNever();
+                d.Property(x => x.Id).ValueGeneratedNever(); // Guid set in ctor
+
+                d.HasIndex("BorrowerProfileId");
                 d.Property(p => p.LenderName).HasMaxLength(200).IsRequired();
                 d.Property(p => p.DebtType).HasMaxLength(100).IsRequired();
                 d.Property(p => p.Amount).HasColumnType("decimal(18,2)");
-                d.HasIndex("BorrowerProfileId");
-               
             });
 
-            b.Property(x => x.PhotoPath).HasMaxLength(1024);
-
-            // Documents (owned collection)
+            // Documents (owned collection) — BorrowerDocument has Guid Id
             b.OwnsMany(x => x.Documents, d =>
             {
-                d.ToTable("BorrowerDocuments");
+                d.ToTable("BorrowerProfileDocuments");
                 d.WithOwner().HasForeignKey("BorrowerProfileId");
+
                 d.HasKey(x => x.Id);
-                d.Property(x => x.Id).ValueGeneratedNever();
+                d.Property(x => x.Id).ValueGeneratedNever(); // Guid set in ctor
+
+                d.HasIndex("BorrowerProfileId");
                 d.Property(x => x.Type).HasConversion<int>();
                 d.Property(x => x.FileName).HasMaxLength(256).IsRequired();
                 d.Property(x => x.StoragePath).HasMaxLength(1024).IsRequired();
-                d.Property(x => x.UploadedAtUtc);
-                d.HasIndex("BorrowerProfileId");
-               
+                d.Property(x => x.UploadedAtUtc).IsRequired();
             });
 
-            // Audit trail (owned collection)
+            // Audit trail (owned collection) — AuditTrailEntry has Guid Id
             b.OwnsMany(x => x.AuditTrail, a =>
             {
-                a.ToTable("BorrowerAuditTrail");
+                a.ToTable("BorrowerProfileAuditTrail");
                 a.WithOwner().HasForeignKey("BorrowerProfileId");
+
                 a.HasKey(x => x.Id);
-                a.Property(x => x.Id).ValueGeneratedNever();
+                a.Property(x => x.Id).ValueGeneratedNever(); // Guid set in ctor
+
+                a.HasIndex("BorrowerProfileId");
                 a.Property(x => x.Action).HasMaxLength(64);
                 a.Property(x => x.Reason).HasMaxLength(2000);
                 a.Property(x => x.PerformedBy).HasMaxLength(256);
-                a.Property(x => x.OccurredAtUtc);
+                a.Property(x => x.OccurredAtUtc).IsRequired();
                 a.Property(x => x.OldStatus).HasConversion<int?>();
                 a.Property(x => x.NewStatus).HasConversion<int?>();
-               
             });
-
-            b.Property(x => x.IsDisabled).HasDefaultValue(false);
-            b.Property(x => x.DisabledReason).HasMaxLength(512);
-
         }
     }
 }

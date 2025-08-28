@@ -53,6 +53,8 @@ builder.Services
         };
     });
 
+
+
 // ─────────────────────────────────────────────
 // Authorization policies
 // ─────────────────────────────────────────────
@@ -178,10 +180,10 @@ app.UseSwaggerUI();
 // ─────────────────────────────────────────────
 // Migrate & seed
 // ─────────────────────────────────────────────
-using (var scope = app.Services.CreateScope())
-{
-    await PersistenceMigrationRunner.RunAsync(scope.ServiceProvider);
-    await IdentitySeed.SeedAsync(scope.ServiceProvider);
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    await PersistenceMigrationRunner.RunAsync(scope.ServiceProvider);
+//    await IdentitySeed.SeedAsync(scope.ServiceProvider);
+//}
 
 app.Run();

@@ -7,7 +7,7 @@ namespace MoneyMarket.Domain.Borrowers;
 public sealed class BorrowerProfile
 {
     public Guid Id { get; private set; }
-    public string UserId { get; private set; } = default!;
+    public Guid UserId { get; private set; }
     public string FirstName { get; private set; } = default!;
     public string LastName { get; private set; } = default!;
     public DateTime DateOfBirth { get; private set; }
@@ -40,7 +40,7 @@ public sealed class BorrowerProfile
     private BorrowerProfile() { }
 
     public static BorrowerProfile CreateDraft(
-        string userId, string firstName, string lastName, DateTime dob, string nationalId,
+        Guid userId, string firstName, string lastName, DateTime dob, string nationalId,
         Address address, string phone, string email)
     {
         var now = DateTime.UtcNow;

@@ -25,12 +25,12 @@ public sealed class JwtTokenService : IJwtTokenService
         var claims = new List<Claim>
         {
             // .NET-friendly claims
-            new(ClaimTypes.NameIdentifier, userId),
+            new(ClaimTypes.NameIdentifier, userId.ToString()),
             new(ClaimTypes.Name, email),
             new(ClaimTypes.Email, email),
 
             // Standard JWT names (good for interop / FE libs)
-            new(JwtRegisteredClaimNames.Sub, userId),
+            new(JwtRegisteredClaimNames.Sub, userId.ToString()),
             new(JwtRegisteredClaimNames.Email, email),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Iat, new DateTimeOffset(now).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)

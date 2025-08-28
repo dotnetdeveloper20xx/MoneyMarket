@@ -30,7 +30,7 @@ namespace MoneyMarket.Application.Features.Lenders.Handlers.Products
 
             var lenderId = lender.LenderId;
 
-            var (items, total) = await _products.GetMinePagedAsync(lender.UserId, request.PageNumber, request.PageSize, ct);
+            var (items, total) = await _products.GetMinePagedAsync(lender.LenderId, request.PageNumber, request.PageSize, ct);
             var mapped = items.Select(p => p.ToView()).ToList();
 
             return PagedResult<LenderProductViewDto>.Create(mapped, request.PageNumber, request.PageSize, total);

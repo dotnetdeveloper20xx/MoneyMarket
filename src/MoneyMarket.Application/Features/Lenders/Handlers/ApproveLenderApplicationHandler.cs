@@ -9,6 +9,10 @@ using MoneyMarket.Domain.Lenders;
 
 namespace MoneyMarket.Application.Features.Lenders.Handlers
 {
+    /// <summary>
+    /// Approves a submitted lender application, provisions the live Lender profile,
+    /// and assigns the "Lender" role to the underlying identity.
+    /// </summary>
     public sealed class ApproveLenderApplicationHandler
         : IRequestHandler<ApproveLenderApplicationCommand, LenderApplicationSummaryDto>
     {
@@ -44,28 +48,26 @@ namespace MoneyMarket.Application.Features.Lenders.Handlers
 
             app.Approve(adminEmail);
 
-            // Resolve the canonical Identity user id from the email on the application
+            // 1) Resolve canonical Identity Id from email (do NOT trust app.UserId)
             var identityUserId = await _identity.GetUserIdGuidByEmailAsync(app.Email, ct);
 
-            // Build the live Lender profile using the VERIFIED id
-            var br = app.BusinessRegistration ?? throw new InvalidOperationException("Business registration missing.");
-            var lender = Lender.Register(
-                identityUserId,
-                br.BusinessName,
-                br.RegistrationNumber,
-                br.ComplianceStatement,
-                app.Email);
+            // 2) HARD GUARD: ensure identity row exists (clear error if not)
+            await _identity.EnsureUserExistsAsync(identityUserId, ct);
 
+            // 3) Create Lender with VERIFIED id
+            var br = app.BusinessRegistration ?? throw new InvalidOperationException("Business registration missing.");
+            var lender = Lender.Register(identityUserId, br.BusinessName, br.RegistrationNumber, br.ComplianceStatement, app.Email);
             await _profiles.AddAsync(lender, ct);
 
-            // Assign the Lender role to that identity
+            // 4) Assign role to the same verified id
             await _identity.AddUserToRoleAsync(identityUserId, "Lender", ct);
 
-            _logger.LogInformation("Approved app {AppId}. Created lender {LenderId} for user {UserId}",
+            _logger.LogInformation("Approved AppId={AppId} → LenderId={LenderId}, UserId={UserId}",
                 app.LenderApplicationId, lender.LenderId, identityUserId);
 
-            // UoW commits because this command implements ITransactionalRequest
-            return new LenderApplicationSummaryDto(app.LenderApplicationId, app.Status, app.Email, app.CreatedAtUtc, app.UpdatedAtUtc);
+            // UoW pipeline will commit because the command is transactional
+            return new LenderApplicationSummaryDto(
+                app.LenderApplicationId, app.Status, app.Email, app.CreatedAtUtc, app.UpdatedAtUtc);
         }
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MoneyMarket.Application.Common.Abstractions
+﻿namespace MoneyMarket.Application.Common.Abstractions
 {
     /// <summary>
     /// Abstraction for current user context. Application/Handlers depend on this,
@@ -19,5 +13,8 @@ namespace MoneyMarket.Application.Common.Abstractions
 
         bool IsInRole(string role);
         string GetRequiredUserId(); // throws if not authenticated
+
+        Guid GetRequiredUserIdGuid();      // parsed Guid
+        bool TryGetUserIdGuid(out Guid userId); //  safe parse
     }
 }

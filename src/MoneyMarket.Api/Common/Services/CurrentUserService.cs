@@ -24,4 +24,14 @@ public sealed class CurrentUserService : ICurrentUserService
 
     public string GetRequiredUserId()
         => UserId ?? throw new UnauthorizedAccessException("User is not authenticated.");
+
+    public Guid GetRequiredUserIdGuid()
+    {
+        if (!IsAuthenticated) throw new UnauthorizedAccessException("User is not authenticated.");
+        if (Guid.TryParse(UserId, out var g)) return g;
+        throw new InvalidOperationException("Invalid user id claim.");
+    }
+
+    public bool TryGetUserIdGuid(out Guid userId) =>
+        Guid.TryParse(UserId, out userId);
 }
